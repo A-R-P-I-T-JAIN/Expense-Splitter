@@ -1,12 +1,19 @@
 const Room = require('../models/roomModel');
 
 exports.createRoom = async (req, res) => {
-  console.log("k");
+  console.log("k")
   const { roomId, roomName, userName } = req.body;
-  console.log(roomId, roomName, userName);
-  console.log("4");
+  console.log(roomId, roomName, userName)
+  console.log("4")
 
   try {
+    if (!userName) {
+      return res.status(400).json({
+        success: false,
+        error: 'User name is required',
+      });
+    }
+
     const room = new Room({
       roomId,
       roomName,
@@ -21,14 +28,13 @@ exports.createRoom = async (req, res) => {
       room,
     });
   } catch (error) {
-    console.error('Error creating room:', error);
-    // The missing return statement is here
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
       error,
     });
   }
 };
+
 
 
   exports.joinRoom = async (req, res) => {

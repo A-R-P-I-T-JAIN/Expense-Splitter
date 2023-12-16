@@ -5,6 +5,7 @@ import { liquification } from "./Liquification";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faCircleInfo } from '@fortawesome/free-solid-svg-icons';
 
 // import { useAlert } from "react-alert";
 import toast, { Toaster } from 'react-hot-toast';
@@ -19,6 +20,12 @@ const Expense = ({ socket, expense, members, host, id,userName }) => {
   const [paymentFor, setPaymentFor] = useState("");
   const [paymentBy, setPaymentBy] = useState("");
   const [amount, setAmount] = useState("");
+
+  const [showPaymentInfo, setShowPaymentInfo] = useState(false);
+  const [pb, setPb] = useState("");
+  const [pf, setPf] = useState("");
+  const [am, setAm] = useState("");
+  const [pr, setPr] = useState();
 
   const [participants, setParticipants] = useState([]);
   const [liqarr, setLiqarr] = useState([]);
@@ -88,6 +95,14 @@ const Expense = ({ socket, expense, members, host, id,userName }) => {
   const deleteHandler = (pId) => {
       socket.emit("deletePayment",{pId,id})
   }
+
+  const paymentInfoHandler = (ele) => {
+    setPb(ele.paymentBy)
+    setPf(ele.paymentFor)
+    setAm(ele.amount)
+    setPr(ele.participants)
+    setShowPaymentInfo(true)
+  }
   
 
   return (
@@ -95,6 +110,25 @@ const Expense = ({ socket, expense, members, host, id,userName }) => {
       style={{ display: expense ? "" : "none" }}
       className="room_chat room_expense "
     >
+      <div style={{display: showPaymentInfo?"":"none"}} className="paymentInfo">
+        <div className="paymentInfoDialog">
+          <h1>Payment By : {pb}</h1>
+          <h1>Payment For : {pf}</h1>
+          <h1>amount : {am}</h1>
+          <div>
+            <h1>Members: </h1>
+            <div className="q">
+          {pr && pr.map((p) => (
+            <h2>{p},</h2>
+          ))}
+          </div>
+          </div>
+          
+          
+          <button onClick={() => setShowPaymentInfo(false)} >Back</button>
+        </div>
+      </div>
+  
       <Toaster />
       <div style={{ display: dialog ? "" : "none" }} className="dialog_cont">
         <div className="dialog_main">
@@ -203,6 +237,10 @@ const Expense = ({ socket, expense, members, host, id,userName }) => {
                   style={{display: userName === host?"":"none"}} 
                   onClick={() => deleteHandler(ele._id)}  
                   icon={faTrash} />  
+                  <FontAwesomeIcon 
+                  icon={faCircleInfo}
+                  onClick={() => paymentInfoHandler(ele)} 
+                  />
                 </div>
               </div>
             ))}

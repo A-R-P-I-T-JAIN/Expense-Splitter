@@ -377,7 +377,37 @@
   }
   /* //////////////////////////////////////////////////// */
 
+  .paymentInfo {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #00000063;
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .paymentInfoDialog {
+    width: fit-content;
+    height: fit-content;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 20px;
+    max-width: 500px;
+  }
+  .paymentInfoDialog div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
 @media screen and (max-width: 600px) {
+    .paymentInfoDialog {
+        max-width: 80%;
+      }
     .room_cont {
         gap: 20px;
         min-height: 100vh;

@@ -27,7 +27,6 @@ const Room = ({ socket }) => {
   const isLoading = useSelector((state) => state.room.isLoading);
 
   const { id } = useParams();
-  console.log(id)
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const un = searchParams.get("userName");

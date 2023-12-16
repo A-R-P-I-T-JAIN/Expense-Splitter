@@ -42,7 +42,6 @@ const CreateRoom = ({socket}) => {
   const createRoomHandler = () => {
     const roomId = generateRandom();
     dispatch(createRoom({ roomId, roomName, userName })); 
-    console.log("1") 
 
     // socket.emit('createRoom', { roomId });
     // navigate(`/room/${roomId}?userName=${userName}`, { replace: true });
@@ -55,7 +54,6 @@ const CreateRoom = ({socket}) => {
   
 
   const joinRoomHandler = () => {
-    console.log(joinRoomId);
   
     // Assuming your server emits a 'roomNotFound' event when the room is not found
     socket.emit('joinRoom', { joinRoomId });

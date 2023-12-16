@@ -73,7 +73,7 @@ const Expense = ({ socket, expense, members, host, id,userName }) => {
 
     socket.on("paymentDeleted",() => {
       dispatch(fetchPayments({ roomId: id }));
-      toast.remove("Payment Deleted")
+      toast.success("Payment Deleted")
     })
 
     return () => {

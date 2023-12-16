@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 // import {useAlert} from 'react-alert'
 import { useEffect } from 'react'
 import toast, { Toaster } from 'react-hot-toast';
+import Loader from '../Room/Loader'
 
 
 const CreateRoom = ({socket}) => {
@@ -40,7 +41,8 @@ const CreateRoom = ({socket}) => {
 
   const createRoomHandler = () => {
     const roomId = generateRandom();
-    dispatch(createRoom({ roomId, roomName, userName }));  
+    dispatch(createRoom({ roomId, roomName, userName })); 
+    console.log("1") 
 
     // socket.emit('createRoom', { roomId });
     // navigate(`/room/${roomId}?userName=${userName}`, { replace: true });
@@ -83,6 +85,7 @@ const CreateRoom = ({socket}) => {
     <div className='createroom_cont'>
 
       <Toaster />
+      {isLoading && <Loader />}
 
       <div style={{display: temptemp && !isLoading?"":"none"}} className="temptemp">
           <h1>Room Name: {roomName}</h1>

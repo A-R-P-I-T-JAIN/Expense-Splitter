@@ -28,17 +28,6 @@ io.on("connection", (socket) => {
   socket.on('createRoom', async({ roomId }) => {
       socket.join(roomId);
       console.log(`created room and joined ${roomId}`)
-      // socket.emit('roomCreated');
-
-    //   const room = new Room({
-    //     roomId,
-    //     roomName,
-    //     host: userName,
-    // });
-
-    // await room.save();
-    // socket.join(roomId)
-    // socket.emit('roomCreated');
   });
 
   socket.on('joinRoom', async({ joinRoomId }) => {
@@ -103,6 +92,19 @@ io.on("connection", (socket) => {
     io.to(roomId).emit("recieveMember", { roomId });
   });
   
+  socket.on("deletePayment", async ({ pId, id }) => {
+    try {
+      const room = await Room.findOne({ roomId: id });
+  
+      // Use $pull to remove the payment with the specified _id
+      await room.updateOne({ $pull: { payments: { _id: pId } } });
+  
+      io.to(id).emit("paymentDeleted", { pId });
+    } catch (error) {
+      console.error("Error deleting payment:", error);
+      socket.emit("deletePaymentFailed");
+    }
+  });
 
   socket.on("disconnect", function () {
     console.log("user disconnected");

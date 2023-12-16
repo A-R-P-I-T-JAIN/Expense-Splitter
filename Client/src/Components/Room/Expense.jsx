@@ -4,6 +4,8 @@ import { fetchPayments } from "../../redux/roomSlice";
 import { liquification } from "./Liquification";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
+
 // import { useAlert } from "react-alert";
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -62,6 +64,11 @@ const Expense = ({ socket, expense, members, host, id,userName }) => {
       toast.error("Fill all details!!")
     });
 
+    socket.on("paymentDeleted",() => {
+      dispatch(fetchPayments({ roomId: id }));
+      toast.remove("Payment Deleted")
+    })
+
     return () => {
       socket.off("recievePayment");
     };
@@ -76,6 +83,10 @@ const Expense = ({ socket, expense, members, host, id,userName }) => {
     // console.log(updatedMembers)
     const liquifiedArray = liquification({members: updatedMembers,payments});
     setLiqarr(liquifiedArray)
+  }
+
+  const deleteHandler = (pId) => {
+      socket.emit("deletePayment",{pId,id})
   }
   
 
@@ -186,8 +197,12 @@ const Expense = ({ socket, expense, members, host, id,userName }) => {
                   <h1>{ele.paymentBy}</h1>
                   <p>For {ele.paymentFor}</p>
                 </div>
-                <div className="pay_right">
+                <div className="pay_right" style={{alignItems:"center",gap:"10px"}}>
                   <p>Rs. {ele.amount}</p>
+                  <FontAwesomeIcon 
+                  style={{display: userName === host?"":"none"}} 
+                  onClick={() => deleteHandler(ele._id)}  
+                  icon={faTrash} />  
                 </div>
               </div>
             ))}

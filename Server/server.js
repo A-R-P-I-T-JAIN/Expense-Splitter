@@ -3,6 +3,7 @@ const http = require("http");
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 const Room = require("./models/roomModel.js");
+require('dotenv').config();
 
 const connectDatabase = require("./config/database.js");
 

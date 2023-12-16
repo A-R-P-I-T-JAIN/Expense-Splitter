@@ -3,12 +3,13 @@ import axios from 'axios';
 
 export const createRoom = createAsyncThunk('room/createRoom',async({roomId,roomName,userName}) => {
    
-  
+  console.log("2")
     let link = `https://expense-splitter.onrender.com/api/v1/createroom`
 
     const config = { headers: { "Content-Type": "application/json" } };
 
     const response = await axios.post(link,{roomId,roomName,userName},config);
+    console.log("3")
 
     return response.data;
 });

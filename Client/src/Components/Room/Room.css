@@ -541,6 +541,7 @@
     .room_expense_right h1 {
         margin: 0;
         color: #0b033c;
+        font-size: 23px;
     }
     .liquidation {
         width: 100%;

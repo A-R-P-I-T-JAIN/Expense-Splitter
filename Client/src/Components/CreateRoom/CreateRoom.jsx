@@ -12,6 +12,8 @@ const CreateRoom = ({socket}) => {
 
   // const alert = useAlert()
 
+  const isLoading = useSelector((state) => state.room.isLoading);
+
   const navigate = useNavigate();
 
   const dispatch = useDispatch();
@@ -82,7 +84,7 @@ const CreateRoom = ({socket}) => {
 
       <Toaster />
 
-      <div style={{display: temptemp?"":"none"}} className="temptemp">
+      <div style={{display: temptemp && !isLoading?"":"none"}} className="temptemp">
           <h1>Room Name: {roomName}</h1>
           <h1>user Name: {userName}</h1>
           <h1>Room Id: {rId}</h1>

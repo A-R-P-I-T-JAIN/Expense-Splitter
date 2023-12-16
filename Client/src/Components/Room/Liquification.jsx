@@ -43,14 +43,14 @@ export const liquification = ({ members, payments }) => {
         liquifiedArray.push({
           payer: members[i],
           reciever: members[j],
-          amount: calcAmt,
+          amount: Math.floor(calcAmt),
         });
       } else {
         let calcAmt = matrix[j][i] - matrix[i][j];
         liquifiedArray.push({
           payer: members[j],
           reciever: members[i],
-          amount: calcAmt,
+          amount: Math.floor(calcAmt),
         });
       }
     }

@@ -4,7 +4,7 @@ import axios from 'axios';
 export const createRoom = createAsyncThunk('room/createRoom',async({roomId,roomName,userName}) => {
    
   
-    let link = `/api/v1/createroom`
+    let link = `https://expense-splitter.onrender.com/api/v1/createroom`
 
     const config = { headers: { "Content-Type": "application/json" } };
 
@@ -14,7 +14,7 @@ export const createRoom = createAsyncThunk('room/createRoom',async({roomId,roomN
 });
 
 export const joinRoom = createAsyncThunk('room/joinRoom',async({joinRoomId,userName}) => {
-  let link = `/api/v1/joinroom`
+  let link = `https://expense-splitter.onrender.com/api/v1/joinroom`
 
     const config = { headers: { "Content-Type": "application/json" } };
 
@@ -24,7 +24,7 @@ export const joinRoom = createAsyncThunk('room/joinRoom',async({joinRoomId,userN
 })
 
 export const addMember = createAsyncThunk('member/addMember',async({roomId,memberName}) => {
-  let link = `/api/v1/addmember`
+  let link = `https://expense-splitter.onrender.com/api/v1/addmember`
   console.log(roomId)
 
     const config = { headers: { "Content-Type": "application/json" } };
@@ -35,7 +35,7 @@ export const addMember = createAsyncThunk('member/addMember',async({roomId,membe
 })
 
 export const fetchMembers = createAsyncThunk('members/fetchMembers',async({roomId}) => {
-  let link = `/api/v1/members/${roomId}`
+  let link = `https://expense-splitter.onrender.com/api/v1/members/${roomId}`
 
     // const config = { headers: { "Content-Type": "application/json" } };
 
@@ -44,21 +44,21 @@ export const fetchMembers = createAsyncThunk('members/fetchMembers',async({roomI
 })
 
 export const fetchHost = createAsyncThunk('host/fetchHost',async({roomId}) => {
-  let link = `/api/v1/host/${roomId}`
+  let link = `https://expense-splitter.onrender.com/api/v1/host/${roomId}`
 
   const response = await axios.get(link);
   return response.data;
 })
 
 export const fetchRoomName = createAsyncThunk('roomName/fetchRoomName',async({roomId}) => {
-  let link = `/api/v1/roomname/${roomId}`
+  let link = `https://expense-splitter.onrender.com/api/v1/roomname/${roomId}`
 
   const response = await axios.get(link);
   return response.data;
 })
 
 export const fetchMessages = createAsyncThunk('messages/fetchMessages',async({roomId}) => {
-  let link = `/api/v1/messages/${roomId}`
+  let link = `https://expense-splitter.onrender.com/api/v1/messages/${roomId}`
 
   const response = await axios.get(link);
   return response.data;
@@ -66,14 +66,14 @@ export const fetchMessages = createAsyncThunk('messages/fetchMessages',async({ro
 
 
 export const fetchPayments = createAsyncThunk('payments/fetchPayments',async({roomId}) => {
-  let link = `/api/v1/payments/${roomId}`
+  let link = `https://expense-splitter.onrender.com/api/v1/payments/${roomId}`
 
   const response = await axios.get(link);
   return response.data;
 })
 
 export const isRoom = createAsyncThunk('room/isRoom',async({roomId}) => {
-  let link = `/api/v1/isRoom`
+  let link = `https://expense-splitter.onrender.com/api/v1/isRoom`
 
   const response = await axios.post(link,{roomId});
   return response.data;

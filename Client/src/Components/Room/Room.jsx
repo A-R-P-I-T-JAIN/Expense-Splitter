@@ -96,18 +96,18 @@ const Room = ({ socket }) => {
         >
           <option value="">Tell us Who are you</option>
           <option value={host}>{host}</option>
-          {members &&
+          {/* {members &&
             members.map((member) => (
               <option value={member} key={member}>
                 {member}
               </option>
-            ))}
-          {/* {members &&
+            ))} */}
+          {members &&
             members.map((member) => (
               <option value={member.userName} key={member.userName}>
                 {member.userName}
               </option>
-            ))} */}
+            ))}
         </select>
 
         <button onClick={enterRoomHandler}>Enter room</button>

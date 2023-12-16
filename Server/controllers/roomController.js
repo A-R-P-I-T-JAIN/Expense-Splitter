@@ -22,7 +22,10 @@ exports.createRoom = async (req, res) => {
     console.log("after room")
 
     // Save the new room
+    console.log("a")
     await room.save();
+    console.log("b")
+
 
     return res.status(200).json({
       success: true,

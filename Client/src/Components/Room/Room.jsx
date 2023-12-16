@@ -98,10 +98,16 @@ const Room = ({ socket }) => {
           <option value={host}>{host}</option>
           {members &&
             members.map((member) => (
+              <option value={member} key={member}>
+                {member}
+              </option>
+            ))}
+          {/* {members &&
+            members.map((member) => (
               <option value={member.userName} key={member.userName}>
                 {member.userName}
               </option>
-            ))}
+            ))} */}
         </select>
 
         <button onClick={enterRoomHandler}>Enter room</button>

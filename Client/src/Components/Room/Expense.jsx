@@ -70,7 +70,8 @@ const Expense = ({ socket, expense, members, host, id,userName }) => {
   const liquify = () => {
     const updatedMembers = [host]
     for(let i = 0; i < members.length;i++){
-      updatedMembers.push(members[i].userName)
+      // updatedMembers.push(members[i].userName)
+      updatedMembers.push(members[i])
     }
     // console.log(updatedMembers)
     const liquifiedArray = liquification({members: updatedMembers,payments});
@@ -97,11 +98,18 @@ const Expense = ({ socket, expense, members, host, id,userName }) => {
             <option value={host}>{host}</option>
             {members &&
               members.map((member) => (
+                <option  value={member}>
+                  {" "}
+                  {member}
+                </option>
+              ))}
+            {/* {members &&
+              members.map((member) => (
                 <option  value={member.userName}>
                   {" "}
                   {member.userName}
                 </option>
-              ))}
+              ))} */}
           </select>
           <h2>Payment of</h2>
           <input
@@ -136,14 +144,16 @@ const Expense = ({ socket, expense, members, host, id,userName }) => {
                 <div >
                   <input
                     onChange={(e) =>
-                      checkboxhandler({ e, user: member.userName })
+                      checkboxhandler({ e, user: member })
+                      // checkboxhandler({ e, user: member.userName })
                     }
                     className="inpt"
                     type="checkbox"
                     name=""
                     id=""
                   />
-                  <p>{member.userName}</p>
+                  {/* <p>{member.userName}</p> */}
+                  <p>{member}</p>
                 </div>
               ))}
           </div>

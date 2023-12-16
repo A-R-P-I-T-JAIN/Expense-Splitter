@@ -27,7 +27,8 @@ const RoomInfo = ({info,roomName,id,host,members}) => {
             <h1>Members:</h1>
             <div>
             {members.map((member,i) => (
-                <p>({i+1}) {member.userName}</p>
+                <p>({i+1}) {member}</p>
+                // <p>({i+1}) {member.userName}</p>
             ))}
             </div>
             

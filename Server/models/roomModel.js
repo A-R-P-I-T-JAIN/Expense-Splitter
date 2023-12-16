@@ -16,17 +16,22 @@ const roomSchema = new mongoose.Schema({
     },
     members:[
         {
-            userName:{
-                type:String,
-                required:true,
-                unique: true
-            },
-            joinedAt:{
-                type:Date,
-                default: Date.now
-            }
+            type:String,
         },
     ],
+    // members:[
+    //     {
+    //         userName:{
+    //             type:String,
+    //             required:true,
+    //             unique: true
+    //         },
+    //         joinedAt:{
+    //             type:Date,
+    //             default: Date.now
+    //         }
+    //     },
+    // ],
     messages:[
         {
                 userName:{

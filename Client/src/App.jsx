@@ -7,7 +7,8 @@ import Room from './Components/Room/Room';
 import io from 'socket.io-client';
 import AnimatedCursor from 'react-animated-cursor';
 
-const socket = io('http://localhost:3000');
+// const socket = io('http://localhost:3000');
+const socket = io();
 // const socket = io('https://expense-splitter.onrender.com');
 
 function App() {

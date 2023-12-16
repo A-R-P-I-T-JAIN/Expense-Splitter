@@ -109,5 +109,5 @@ io.on("connection", (socket) => {
 connectDatabase();
 
 server.listen(port, (req, res) => {
-  console.log(`server running at localhost:${port}`);
+  console.log(`server running at Port:${port}`);
 });

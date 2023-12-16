@@ -9,7 +9,7 @@ const connectDatabase = require("./config/database.js");
 
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: "http://localhost:3000",
     methods: ["GET", "POST"],
   },
 });
@@ -41,7 +41,8 @@ io.on("connection", (socket) => {
   });
 
   socket.on('joinRoom', async({ joinRoomId }) => {
-    const room = await Room.findOne({ roomId: joinRoomId }); // You need to implement findRoomById function
+    const room = await Room.findOne({ roomId: joinRoomId });
+    console.log("socket working") // You need to implement findRoomById function
   
     if (!room) {
       // Room not found, emit a 'roomNotFound' event
@@ -49,6 +50,7 @@ io.on("connection", (socket) => {
     } else {
       // Room found, emit a 'roomJoined' event
       socket.join(joinRoomId);
+      console.log("room joined")
       console.log(`User ${socket.id} joined room: ${joinRoomId}`);
       socket.emit('roomJoined');
     }

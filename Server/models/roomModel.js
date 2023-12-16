@@ -24,7 +24,6 @@ const roomSchema = new mongoose.Schema({
             userName:{
                 type:String,
                 required:true,
-                unique: true
             },
             joinedAt:{
                 type:Date,

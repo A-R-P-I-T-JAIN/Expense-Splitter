@@ -13,17 +13,18 @@ exports.createRoom = async (req, res) => {
         error: 'User name is required',
       });
     }
-
+    console.log("before room")
     const room = new Room({
       roomId,
       roomName,
       host: userName,
     });
+    console.log("after room")
 
     // Save the new room
     await room.save();
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       room,
     });

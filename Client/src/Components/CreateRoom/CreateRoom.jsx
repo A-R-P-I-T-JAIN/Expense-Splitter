@@ -3,13 +3,14 @@ import './CreateRoom.css'
 import {useSelector,useDispatch} from 'react-redux'
 import { createRoom, isRoom, joinRoom } from '../../redux/roomSlice'
 import { useNavigate } from 'react-router-dom'
-import {useAlert} from 'react-alert'
+// import {useAlert} from 'react-alert'
 import { useEffect } from 'react'
+import toast, { Toaster } from 'react-hot-toast';
 
 
 const CreateRoom = ({socket}) => {
 
-  const alert = useAlert()
+  // const alert = useAlert()
 
   const navigate = useNavigate();
 
@@ -45,29 +46,6 @@ const CreateRoom = ({socket}) => {
     setCreateRoomOpen(false)
     setTempTemp(true);
 
-//     setRoomName('');
-//     setUsername('');
-  
-//     // Listen for server response
-//     socket.on('roomCreated', () => {
-//       // Room created successfully, dispatch action and navigate
-//       // dispatch(createRoom({ roomId, roomName, userName }));  
-//       console.log("roomCreated")
-//       alert.show("Room Created")
-//       // navigate(`/room/${roomId}?userName=${userName}`, { replace: true });
-//       socket.emit('joinRoom', { joinRoomId: roomId });
-// 8
-//       // Listen for successful room join
-//     socket.on('roomJoined', () => {
-//       alert.show("kjankn")
-//       navigate(`/room/${roomId}`, { replace: true });
-//     });
-
-//     return () => {
-//       socket.off("roomJoined");
-//       socket.off("roomCreated");
-//     };
-//     });
   };
   
   
@@ -81,7 +59,8 @@ const CreateRoom = ({socket}) => {
     // Listen for server response
     socket.on('roomNotFound', () => {
       // Handle room not found (e.g., show an alert)
-      alert.show(`Room with ID ${joinRoomId} not found. Please check the room ID.`);
+      // alert.show(`Room with ID ${joinRoomId} not found. Please check the room ID.`);
+      toast.error(`Room with ID ${joinRoomId} not found. Please check the room ID.`)
       setJoinRoomId('');
     });
   
@@ -100,6 +79,8 @@ const CreateRoom = ({socket}) => {
 
   return (
     <div className='createroom_cont'>
+
+      <Toaster />
 
       <div style={{display: temptemp?"":"none"}} className="temptemp">
           <h1>Room Name: {roomName}</h1>

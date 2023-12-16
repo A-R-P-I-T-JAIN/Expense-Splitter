@@ -4,10 +4,11 @@ import { fetchPayments } from "../../redux/roomSlice";
 import { liquification } from "./Liquification";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
-import { useAlert } from "react-alert";
+// import { useAlert } from "react-alert";
+import toast, { Toaster } from 'react-hot-toast';
 
 const Expense = ({ socket, expense, members, host, id,userName }) => {
-  const alert = useAlert()
+  // const alert = useAlert()
   const dispatch = useDispatch();
 
   const payments = useSelector((state) => state.room.payments);
@@ -53,11 +54,12 @@ const Expense = ({ socket, expense, members, host, id,userName }) => {
   useEffect(() => {
     socket.on("recievePayment", () => {
       dispatch(fetchPayments({ roomId: id }));
-      alert.show("New Payment added")
+      // alert.show("New Payment added")
+      toast.success("New Payment Added")
     });
 
     socket.on("addPaymentFailed", () => {
-      alert.error("Fill all details!!")
+      toast.error("Fill all details!!")
     });
 
     return () => {
@@ -81,6 +83,7 @@ const Expense = ({ socket, expense, members, host, id,userName }) => {
       style={{ display: expense ? "" : "none" }}
       className="room_chat room_expense "
     >
+      <Toaster />
       <div style={{ display: dialog ? "" : "none" }} className="dialog_cont">
         <div className="dialog_main">
           <h2>Payer</h2>

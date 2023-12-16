@@ -12,11 +12,12 @@ import Chat from "./Chat";
 import Expense from "./Expense";
 import RoomInfo from "./RoomInfo";
 import History from "./History";
-import { useAlert } from "react-alert";
+// import { useAlert } from "react-alert";
 import Loader from "./Loader";
+import toast, { Toaster } from 'react-hot-toast';
 
 const Room = ({ socket }) => {
-  const alert = useAlert();
+  // const alert = useAlert();
 
   const dispatch = useDispatch();
 
@@ -56,9 +57,8 @@ const Room = ({ socket }) => {
     
     socket.on("recieveMember", ({roomId}) => {
       dispatch(fetchMembers({ roomId }));
-      alert.show("New member added");
-      console.log("member added")
-      console.log(members)
+      // alert.show("New member added");
+      toast.success("New member added")
     })
     
     return () => {
@@ -78,6 +78,7 @@ const Room = ({ socket }) => {
 
   return (
     <div className="room_cont">
+      <Toaster/>
       {isLoading && <Loader />}
       <h5>{userName}</h5>
       <h4>{roomName}</h4>

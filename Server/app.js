@@ -2,9 +2,11 @@ const express = require('express');
 require("dotenv").config();
 const app = express();
 const path = require('path');
+const cors = require('cors');
 
 
 app.use(express.json());
+app.use(cors());
 
 
 //Route imports

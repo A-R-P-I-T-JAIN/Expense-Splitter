@@ -38,6 +38,7 @@ exports.createRoom = async (req, res) => {
       room,
     });
   } catch (error) {
+    console.log(error)
     res.status(500).json({
       success: false,
       error,

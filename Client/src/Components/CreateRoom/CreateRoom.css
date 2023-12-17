@@ -80,6 +80,57 @@
     justify-content: center;
     color: black;
 }
+.previousRoomCont {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffffff51;
+    backdrop-filter: blur(10px);
+}
+.previous_rooms {
+    min-width: 400px;
+    min-height: 500px;
+    background-color: rgb(173, 210, 243);
+    border-radius: 20px;
+    display: flex;
+    /* align-items: center; */
+    padding: 20px;
+    gap: 10px;
+    max-height: 80%;
+}
+.your_rooms {
+    border: 1px solid black;
+    padding: 0 10px;
+}
+.rtemp {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    overflow-y: scroll;
+    background-color: transparent;
+}
+.your_rooms h1 {
+    color: black;
+}
+
+.your_rooms div div{
+    background-color: #fff;
+    color: black;
+    padding: 0 10px;
+    border-radius: 10px;
+    border: 1px solid black;
+}
+.h3 {
+    font-size: 30px;
+}
 
 @media screen and (max-width: 600px) {
     .createroom_cont {
@@ -101,4 +152,39 @@
     .create_room_card h1 {
         font-size: 25px;
     }
+    .previous_rooms {
+        min-width: 200px;
+        min-height: 300px;
+        padding: 20px;
+        gap: 10px;
+        max-width: 75%;
+        max-height: 80%;
+    }
+    .your_rooms {
+        border: 1px solid black;
+        padding: 0 10px;
+    }
+    .rtemp {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        overflow-y: scroll;
+        background-color: transparent;
+    }
+    .your_rooms h1 {
+        font-size: 15px;
+    }
+    
+    .your_rooms div div{
+        padding: 0 6px;
+    }
+    .your_rooms div div p {
+        font-size: 10px;
+        margin: 4px 0;
+    }
+    .h3 {
+        font-size: 20px;
+    }
+    
 }

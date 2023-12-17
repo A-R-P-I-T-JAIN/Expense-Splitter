@@ -2,13 +2,14 @@ import React, { useState } from 'react'
 import './CreateRoom.css'
 import {useSelector,useDispatch} from 'react-redux'
 import { createRoom, isRoom, joinRoom } from '../../redux/roomSlice'
-import { useNavigate } from 'react-router-dom'
+import { json, useNavigate } from 'react-router-dom'
 // import {useAlert} from 'react-alert'
 import { useEffect } from 'react'
 import toast, { Toaster } from 'react-hot-toast';
 import Loader from '../Room/Loader'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleInfo } from '@fortawesome/free-solid-svg-icons';
+import { faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 
 
 const CreateRoom = ({socket}) => {
@@ -27,6 +28,11 @@ const CreateRoom = ({socket}) => {
   const[userName,setUsername] = useState()
   const[rId,setRId] = useState()
   const[temptemp,setTempTemp] = useState(false)
+  const[showPreviousRoom,setShowPreviousRoom] = useState(false)
+
+  const yourRooms = JSON.parse(localStorage.getItem("rooms")) || [];
+  // const[yourRooms,setYourRooms] = useState(JSON.parse(localStorage.getItem("rooms")) || [])
+  const friendRooms = JSON.parse(localStorage.getItem("joinedRooms")) || [];
 
   function generateRandom(){
     return Math.floor(100000 + Math.random() * 900000);
@@ -48,6 +54,21 @@ const CreateRoom = ({socket}) => {
     // socket.emit('createRoom', { roomId });
     // navigate(`/room/${roomId}?userName=${userName}`, { replace: true });
     setRId(roomId)
+
+    const selfRoom = {
+      roomId,
+      roomName,
+    };
+
+    // Get existing rooms from local storage
+    const existingRooms = JSON.parse(localStorage.getItem("rooms")) || [];
+
+    // Add the new room to the array
+    existingRooms.push(selfRoom);
+
+    // Store the updated array in local storage
+    localStorage.setItem("rooms", JSON.stringify(existingRooms));
+
     setCreateRoomOpen(false)
     setTempTemp(true);
 
@@ -70,6 +91,18 @@ const CreateRoom = ({socket}) => {
   
     // Listen for successful room join
     socket.on('roomJoined', () => {
+      const existingJoinedRooms = JSON.parse(localStorage.getItem("joinedRooms")) || [];
+      // const yourRooms = JSON.parse(localStorage.getItem("rooms")) || [];
+
+      const isAlreadyJoined = existingJoinedRooms.includes(joinRoomId) || yourRooms.some(room => room.roomId === joinRoomId);
+
+
+      if (!isAlreadyJoined) {
+        existingJoinedRooms.push(joinRoomId);
+  
+        // Update local storage
+        localStorage.setItem("joinedRooms", JSON.stringify(existingJoinedRooms));
+      }
       // Room joined successfully, navigate
       navigate(`/room/${joinRoomId}`, { replace: true });
       setJoinRoomId('');
@@ -91,6 +124,38 @@ const CreateRoom = ({socket}) => {
       onClick={() => setTempTemp(true)} 
       style={{position:"absolute",top:"15px",right:"15px",width:"40px"}}
       />
+
+      <h3 
+      className='h3'
+      onClick={() => setShowPreviousRoom(true)}
+      style={{position:"absolute",top:"0",left:"15px"}} >Previous Rooms??</h3>
+
+      <div style={{display: showPreviousRoom?"":"none"}} className="previousRoomCont">
+        <FontAwesomeIcon icon={faCircleXmark} onClick={() => setShowPreviousRoom(false)} />
+      <div className="previous_rooms">
+        <div className="your_rooms">
+          <h1>Created Rooms</h1>
+          <div className="rtemp">
+            {yourRooms && yourRooms.map((room) => (
+              <div>
+                <p>RoomId: {room.roomId}</p>
+                <p>RoomName: {room.roomName}</p>
+              </div>
+            ))}
+            </div>
+        </div>
+        <div className=" your_rooms friend_rooms">
+        <h1>Joined Rooms</h1>
+        <div className="rtemp">
+            {friendRooms && friendRooms.map((room) => (
+              <div>
+                <p>RoomId: {room}</p>
+              </div>
+            ))}
+            </div>
+        </div>
+      </div>
+      </div>
 
       <div style={{display: temptemp && !isLoading?"":"none"}} className="temptemp">
           <h1>Room Name: {roomName}</h1>

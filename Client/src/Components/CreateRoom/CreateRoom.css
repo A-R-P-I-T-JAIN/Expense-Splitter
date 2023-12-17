@@ -52,10 +52,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #000000b7;
+    background-color: #00000097;
+    backdrop-filter: blur(10px);
 }
 .create_room_card {
-    background-color: #fff;
+    background-color: rgb(200, 224, 244);
+    border-radius: 20px;
     color: black;
     padding: 30px;
 }
@@ -95,5 +97,8 @@
     .cr_head h1 {   
         font-size: 30px;
         color: rgb(140, 251, 221);
+    }
+    .create_room_card h1 {
+        font-size: 25px;
     }
 }

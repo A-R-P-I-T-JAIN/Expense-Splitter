@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchPayments } from "../../redux/roomSlice";
 import { liquification } from "./Liquification";
@@ -13,6 +13,7 @@ import toast, { Toaster } from 'react-hot-toast';
 const Expense = ({ socket, expense, members, host, id,userName }) => {
   // const alert = useAlert()
   const dispatch = useDispatch();
+  const ref = useRef()
 
   const payments = useSelector((state) => state.room.payments);
 
@@ -29,6 +30,19 @@ const Expense = ({ socket, expense, members, host, id,userName }) => {
 
   const [participants, setParticipants] = useState([]);
   const [liqarr, setLiqarr] = useState([]);
+  const [checkboxStates, setCheckboxStates] = useState(
+    Array.from({ length: members.length + 1 }, () => false)
+  );
+  
+
+  useEffect(() => {
+    // Reset checkbox states when members array changes
+    setCheckboxStates(Array.from({ length: members.length + 1 }, () => false));
+  }, [members]);
+
+  useEffect(() => {
+    liquify()
+  },[payments])
 
   const saveHandler = () => {
     socket.emit("addPayment", {
@@ -43,11 +57,23 @@ const Expense = ({ socket, expense, members, host, id,userName }) => {
     setPaymentFor("");
     setAmount("");
     setParticipants([]);
+
+    setCheckboxStates(Array.from({ length: members.length + 1 }, () => false));
+    if (ref.current) {
+      ref.current.checked = false;
+    }
+
     setDialog(false);
   };
 
-  const checkboxhandler = ({ e, user }) => {
+  const checkboxhandler = ({ e, user,index }) => {
     const isChecked = e.target.checked;
+
+    setCheckboxStates((prevStates) => {
+      const newStates = [...prevStates];
+      newStates[index+1] = isChecked;
+      return newStates;
+    }); 
 
     if (isChecked) {
       setParticipants([...participants, user]);
@@ -176,6 +202,7 @@ const Expense = ({ socket, expense, members, host, id,userName }) => {
           <div>
             <div>
               <input
+                ref={ref}
                 onChange={(e) => checkboxhandler({ e, user: host })}
                 className="inpt"
                 type="checkbox"
@@ -185,12 +212,13 @@ const Expense = ({ socket, expense, members, host, id,userName }) => {
               <p>{host}</p>
             </div>
             {members &&
-              members.map((member) => (
+              members.map((member,index) => (
                 <div >
                   <input
+                 checked={checkboxStates[index + 1]}
                     onChange={(e) =>
                       // checkboxhandler({ e, user: member })
-                      checkboxhandler({ e, user: member.userName })
+                      checkboxhandler({ e, user: member.userName,index })
                     }
                     className="inpt"
                     type="checkbox"
@@ -252,7 +280,7 @@ const Expense = ({ socket, expense, members, host, id,userName }) => {
         <h1>Payment Liquidation</h1>
 
         <div className="liquidation">
-            <button onClick={liquify} >Liquify</button>
+            {/* <button onClick={liquify} >Liquify</button> */}
             {liqarr && liqarr.map((ele) => (
               <div>
                 <p className={ele.payer === userName?"self":""} >{ele.payer}</p>

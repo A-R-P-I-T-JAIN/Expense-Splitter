@@ -7,6 +7,8 @@ import { useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import toast, { Toaster } from 'react-hot-toast';
 import Loader from '../Room/Loader'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCircleInfo } from '@fortawesome/free-solid-svg-icons';
 
 
 const CreateRoom = ({socket}) => {
@@ -84,6 +86,11 @@ const CreateRoom = ({socket}) => {
 
       <Toaster />
       {isLoading && <Loader />}
+      <FontAwesomeIcon 
+      icon={faCircleInfo} 
+      onClick={() => setTempTemp(true)} 
+      style={{position:"absolute",top:"15px",right:"15px",width:"40px"}}
+      />
 
       <div style={{display: temptemp && !isLoading?"":"none"}} className="temptemp">
           <h1>Room Name: {roomName}</h1>

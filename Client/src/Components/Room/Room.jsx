@@ -72,6 +72,7 @@ const Room = ({ socket }) => {
   };
 
   const enterRoomHandler = () => {
+    socket.emit("joinRoom2",{roomId: id})
     setMembersList(false);
   };
 

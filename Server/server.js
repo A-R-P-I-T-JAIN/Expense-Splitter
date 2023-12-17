@@ -46,6 +46,10 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("joinRoom2",({roomId}) => {
+    socket.join(roomId)
+  })
+
   socket.on("sendMessage", async ({ message, name, roomId }) => {
     const room = await Room.findOne({ roomId });
 

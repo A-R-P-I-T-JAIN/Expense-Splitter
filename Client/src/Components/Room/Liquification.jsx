@@ -19,16 +19,15 @@ export const liquification = ({ members, payments }) => {
 
   for (let i = 0; i < payments.length; i++) {
     let index = findIdx(payments[i].paymentBy,members);
-    console.log(index);
+    
     let amount = payments[i].amount / payments[i].participants.length;
-    console.log(amount);
+    
     for (let j = 0; j < payments[i].participants.length; j++) {
       let parIdx = findIdx(payments[i].participants[j],members);
       matrix[parIdx][index] = amount;
     }
   }
 
-  console.log(matrix);
 
   let liquifiedArray = [];
 

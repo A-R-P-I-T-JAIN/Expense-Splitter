@@ -24,7 +24,7 @@ export const liquification = ({ members, payments }) => {
     
     for (let j = 0; j < payments[i].participants.length; j++) {
       let parIdx = findIdx(payments[i].participants[j],members);
-      matrix[parIdx][index] = amount;
+      matrix[parIdx][index] += amount;
     }
   }
 

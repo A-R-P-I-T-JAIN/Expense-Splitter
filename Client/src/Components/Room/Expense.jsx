@@ -82,6 +82,23 @@ const Expense = ({ socket, expense, members, host, id,userName }) => {
     }
   };
 
+  const selectAllHandler = (e) => {
+    const isChecked = e.target.checked;
+    const allMembers = [host, ...members.map(member => member.userName)];
+    
+    setCheckboxStates(Array.from({ length: members.length + 1 }, () => isChecked));
+    
+    if (isChecked) {
+      setParticipants(allMembers);
+    } else {
+      setParticipants([]);
+    }
+    
+    if (ref.current) {
+      ref.current.checked = isChecked;
+    }
+  };
+
   useEffect(() => {
     dispatch(fetchPayments({ roomId: id }));
   }, [dispatch]);
@@ -167,13 +184,6 @@ const Expense = ({ socket, expense, members, host, id,userName }) => {
           >
             <option value="">Payer...</option>
             <option value={host}>{host}</option>
-            {/* {members &&
-              members.map((member) => (
-                <option  value={member}>
-                  {" "}
-                  {member}
-                </option>
-              ))} */}
             {members &&
               members.map((member) => (
                 <option  value={member.userName}>
@@ -199,11 +209,22 @@ const Expense = ({ socket, expense, members, host, id,userName }) => {
             id=""
           />
           <h2>Payment for</h2>
-          <div>
+          <div className="select-all-container">
+            <div>
+              <input
+                type="checkbox"
+                onChange={selectAllHandler}
+                id="selectAll"
+              />
+              <label htmlFor="selectAll">Select All</label>
+            </div>
+          </div>
+          <div className="participants-list">
             <div>
               <input
                 ref={ref}
-                onChange={(e) => checkboxhandler({ e, user: host })}
+                checked={checkboxStates[0]}
+                onChange={(e) => checkboxhandler({ e, user: host, index: -1 })}
                 className="inpt"
                 type="checkbox"
                 name=""
@@ -215,9 +236,8 @@ const Expense = ({ socket, expense, members, host, id,userName }) => {
               members.map((member,index) => (
                 <div >
                   <input
-                 checked={checkboxStates[index + 1]}
+                    checked={checkboxStates[index + 1]}
                     onChange={(e) =>
-                      // checkboxhandler({ e, user: member })
                       checkboxhandler({ e, user: member.userName,index })
                     }
                     className="inpt"
@@ -226,7 +246,6 @@ const Expense = ({ socket, expense, members, host, id,userName }) => {
                     id=""
                   />
                   <p>{member.userName}</p>
-                  {/* <p>{member}</p> */}
                 </div>
               ))}
           </div>
@@ -276,11 +295,8 @@ const Expense = ({ socket, expense, members, host, id,userName }) => {
       </div>
 
       <div className="room_expense_right">
-
         <h1>Payment Liquidation</h1>
-
         <div className="liquidation">
-            {/* <button onClick={liquify} >Liquify</button> */}
             {liqarr && liqarr.map((ele) => (
               <div>
                 <p className={ele.payer === userName?"self":""} >{ele.payer}</p>

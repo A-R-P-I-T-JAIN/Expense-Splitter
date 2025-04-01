@@ -22,6 +22,8 @@ const Expense = ({ socket, expense, members, host, id, userName }) => {
   const [checkboxStates, setCheckboxStates] = useState(
     Array.from({ length: members.length + 1 }, () => false)
   );
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [paymentToDelete, setPaymentToDelete] = useState(null);
 
   // Reset checkbox states when members array changes
   useEffect(() => {
@@ -131,7 +133,19 @@ const Expense = ({ socket, expense, members, host, id, userName }) => {
   }, [socket, dispatch, id]);
 
   const deleteHandler = (pId) => {
-    socket.emit("deletePayment", { pId, id });
+    setPaymentToDelete(pId);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = () => {
+    socket.emit("deletePayment", { pId: paymentToDelete, id });
+    setShowDeleteConfirm(false);
+    setPaymentToDelete(null);
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirm(false);
+    setPaymentToDelete(null);
   };
 
   const paymentInfoHandler = (payment) => {
@@ -146,6 +160,30 @@ const Expense = ({ socket, expense, members, host, id, userName }) => {
 
   return (
     <div style={{ display: expense ? "" : "none" }} className="room_chat room_expense">
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className="delete-confirm-overlay">
+          <div className="delete-confirm-dialog">
+            <h3>Confirm Deletion</h3>
+            <p>Are you sure you want to delete this payment?</p>
+            <div className="delete-confirm-actions">
+              <button 
+                className="delete-confirm-btn delete-confirm-cancel"
+                onClick={cancelDelete}
+              >
+                Cancel
+              </button>
+              <button 
+                className="delete-confirm-btn delete-confirm-proceed"
+                onClick={confirmDelete}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Payment Info Dialog */}
       <div style={{ display: showPaymentInfo ? "" : "none" }} className="paymentInfo">
         <div className="paymentInfoDialog">
@@ -261,12 +299,14 @@ const Expense = ({ socket, expense, members, host, id, userName }) => {
                   {userName === host && (
                     <FontAwesomeIcon 
                       icon={faTrash} 
-                      onClick={() => deleteHandler(payment._id)}  
+                      onClick={() => deleteHandler(payment._id)}
+                      className="delete-icon"  
                     />
                   )}
                   <FontAwesomeIcon 
                     icon={faCircleInfo}
                     onClick={() => paymentInfoHandler(payment)} 
+                    className="info-icon"
                   />
                 </div>
               </div>
@@ -296,6 +336,91 @@ const Expense = ({ socket, expense, members, host, id, userName }) => {
           )}
         </div>
       </div>
+
+      <style jsx>{`
+        .delete-confirm-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: rgba(0, 0, 0, 0.5);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 1000;
+        }
+
+        .delete-confirm-dialog {
+          background-color: white;
+          padding: 20px;
+          border-radius: 8px;
+          width: 300px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .delete-confirm-dialog h3 {
+          margin-top: 0;
+          color: #333;
+        }
+
+        .delete-confirm-dialog p {
+          margin-bottom: 20px;
+          color: #666;
+        }
+
+        .delete-confirm-actions {
+          display: flex;
+          justify-content: flex-end;
+          gap: 10px;
+        }
+
+        .delete-confirm-btn {
+          padding: 8px 16px;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-weight: 500;
+        }
+
+        .delete-confirm-cancel {
+          background-color: #f0f0f0;
+          color: #333;
+        }
+
+        .delete-confirm-cancel:hover {
+          background-color: #e0e0e0;
+        }
+
+        .delete-confirm-proceed {
+          background-color: #ff4d4f;
+          color: white;
+        }
+
+        .delete-confirm-proceed:hover {
+          background-color: #ff7875;
+        }
+
+        .delete-icon {
+          color: #ff4d4f;
+          cursor: pointer;
+          transition: color 0.2s;
+        }
+
+        .delete-icon:hover {
+          color: #ff7875;
+        }
+
+        .info-icon {
+          color: #1890ff;
+          cursor: pointer;
+          transition: color 0.2s;
+        }
+
+        .info-icon:hover {
+          color: #40a9ff;
+        }
+      `}</style>
     </div>
   );
 };

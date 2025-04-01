@@ -3,23 +3,29 @@ function findIdx(k, members) {
 }
 
 export const liquification = ({ members, payments }) => {
-  if (members.length === 0 || payments.length === 0) return [];
+  if (!members || !payments || members.length === 0 || payments.length === 0) {
+      return [];
+  }
 
   const memberCount = members.length;
   const matrix = Array.from({ length: memberCount }, () => 
       new Array(memberCount).fill(0)
   );
 
-  // Process each payment
+  // Process each valid payment
   payments.forEach(payment => {
+      if (!payment.paymentBy || payment.amount <= 0 || !payment.participants || payment.participants.length === 0) {
+          return;
+      }
+
       const payerIdx = findIdx(payment.paymentBy, members);
-      if (payerIdx === -1) return; // Skip if payer not found
+      if (payerIdx === -1) return;
       
       const amountPerParticipant = payment.amount / payment.participants.length;
       
       payment.participants.forEach(participant => {
           const parIdx = findIdx(participant, members);
-          if (parIdx !== -1) { // Only process valid participants
+          if (parIdx !== -1) {
               matrix[parIdx][payerIdx] += amountPerParticipant;
           }
       });
@@ -32,20 +38,12 @@ export const liquification = ({ members, payments }) => {
       for (let j = i + 1; j < memberCount; j++) {
           const diff = matrix[i][j] - matrix[j][i];
           
-          if (Math.abs(diff) > 0.001) { // Using small epsilon to avoid floating point precision issues
-              if (diff > 0) {
-                  liquifiedArray.push({
-                      payer: members[i],
-                      reciever: members[j],
-                      amount: parseFloat(diff.toFixed(2)) // Keeping 2 decimal places
-                  });
-              } else {
-                  liquifiedArray.push({
-                      payer: members[j],
-                      reciever: members[i],
-                      amount: parseFloat(Math.abs(diff).toFixed(2))
-                  });
-              }
+          if (Math.abs(diff) > 0.01) { // Threshold for meaningful amounts
+              liquifiedArray.push({
+                  payer: diff > 0 ? members[i] : members[j],
+                  reciever: diff > 0 ? members[j] : members[i],
+                  amount: parseFloat(Math.abs(diff).toFixed(2))
+              });
           }
       }
   }

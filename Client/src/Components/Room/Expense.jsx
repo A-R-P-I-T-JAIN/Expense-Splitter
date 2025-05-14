@@ -28,6 +28,7 @@ const Expense = ({ socket, members, host, id, userName }) => {
     setCheckboxStates(Array.from({ length: members.length + 1 }, () => false));
   }, [members]);
 
+  // Liquify payments when payments, host or members change
   useEffect(() => {
     const liquify = () => {
       if (!host || !members || !payments) return;
@@ -69,6 +70,7 @@ const Expense = ({ socket, members, host, id, userName }) => {
       roomId: id,
     });
 
+    // Reset form
     setPaymentBy("");
     setPaymentFor("");
     setAmount("");
@@ -389,6 +391,91 @@ const Expense = ({ socket, members, host, id, userName }) => {
           )}
         </div>
       </div>
+
+      <style jsx>{`
+        .delete-confirm-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: rgba(0, 0, 0, 0.5);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 1000;
+        }
+
+        .delete-confirm-dialog {
+          background-color: white;
+          padding: 20px;
+          border-radius: 8px;
+          width: 300px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .delete-confirm-dialog h3 {
+          margin-top: 0;
+          color: #333;
+        }
+
+        .delete-confirm-dialog p {
+          margin-bottom: 20px;
+          color: #666;
+        }
+
+        .delete-confirm-actions {
+          display: flex;
+          justify-content: flex-end;
+          gap: 10px;
+        }
+
+        .delete-confirm-btn {
+          padding: 8px 16px;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-weight: 500;
+        }
+
+        .delete-confirm-cancel {
+          background-color: #f0f0f0;
+          color: #333;
+        }
+
+        .delete-confirm-cancel:hover {
+          background-color: #e0e0e0;
+        }
+
+        .delete-confirm-proceed {
+          background-color: #ff4d4f;
+          color: white;
+        }
+
+        .delete-confirm-proceed:hover {
+          background-color: #ff7875;
+        }
+
+        .delete-icon {
+          color: #ff4d4f;
+          cursor: pointer;
+          transition: color 0.2s;
+        }
+
+        .delete-icon:hover {
+          color: #ff7875;
+        }
+
+        .info-icon {
+          color: #1890ff;
+          cursor: pointer;
+          transition: color 0.2s;
+        }
+
+        .info-icon:hover {
+          color: #40a9ff;
+        }
+      `}</style>
     </div>
   );
 };

@@ -2,7 +2,8 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 // Base URL for the API
-const API_BASE_URL = 'http://localhost:3000/api/v1';
+// const API_BASE_URL = 'http://localhost:3000/api/v1';
+const API_BASE_URL = 'https://expense-splitter.onrender.com/api/v1';
 
 // Reusable Axios config
 const jsonConfig = { headers: { 'Content-Type': 'application/json' } };

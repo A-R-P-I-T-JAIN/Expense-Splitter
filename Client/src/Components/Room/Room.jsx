@@ -39,10 +39,12 @@ const Room = ({ socket }) => {
   const [memberName, setMemberName] = useState("");
   const [membersList, setMembersList] = useState(!un);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const [isDataLoading, setIsDataLoading] = useState(true);
 
   // Fetch initial data
   useEffect(() => {
     const fetchInitialData = async () => {
+      setIsDataLoading(true);
       try {
         await dispatch(fetchMembers({ roomId: id })).unwrap();
         await dispatch(fetchRoomName({ roomId: id })).unwrap();
@@ -50,10 +52,12 @@ const Room = ({ socket }) => {
         await dispatch(fetchMessages({ roomId: id })).unwrap();
         await dispatch(fetchPayments({ roomId: id })).unwrap();
         setInitialLoadComplete(true);
+        setIsDataLoading(false);
         console.log("Initial data fetched successfully");
       } catch (error) {
         console.error("Error fetching initial data:", error);
         toast.error("Failed to load room data. Please try again.");
+        setIsDataLoading(false);
       }
     };
     
@@ -100,12 +104,20 @@ const Room = ({ socket }) => {
     console.log("Active tab:", activeTab);
     console.log("Is loading:", isLoading);
     console.log("Initial load complete:", initialLoadComplete);
-  }, [activeTab, isLoading, initialLoadComplete]);
+    console.log("Is data loading:", isDataLoading);
+  }, [activeTab, isLoading, initialLoadComplete, isDataLoading]);
 
-  if (isLoading && !initialLoadComplete) {
+  if (isDataLoading || (isLoading && !initialLoadComplete)) {
     console.log("Showing loader");
     return (
-      <div className="loading-container">
+      <div className="loading-container" style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        width: '100vw',
+        backgroundColor: 'transparent'
+      }}>
         <Loader />
       </div>
     );

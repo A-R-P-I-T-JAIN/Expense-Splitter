@@ -13,45 +13,48 @@ import { useNavigate } from "react-router-dom";
 import logo from "../../assets/splitter_logo.png"
 
 const Home = () => {
-
   const [bgc, setBgc] = useState("");
   const [fgc, setFgc] = useState("");
   const [img, setImg] = useState();
-  const[animate,setAnimate] = useState(false)
+  const [animate, setAnimate] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   const updateMain = () => {
     setTimeout(() => {
-      setBgc("#bff5dd");
-      setFgc("#23de93");
-      setImg(img1)
-      setAnimate(true)
+      setBgc("var(--background-light)");
+      setFgc("var(--primary-color)");
+      setImg(img1);
+      setAnimate(true);
     }, 0);
     setTimeout(() => {
-      setBgc("#f3a4d4");
-      setFgc("#f72ca6");
-      setImg(img2)
-      setAnimate(true)
+      setBgc("var(--background-light)");
+      setFgc("var(--secondary-color)");
+      setImg(img2);
+      setAnimate(true);
     }, 2500);
     setTimeout(() => {
-      setBgc("#91b4e6");
-      setFgc("#1f78f6");
-      setImg(img3)
-      setAnimate(true)
+      setBgc("var(--background-light)");
+      setFgc("var(--accent-color)");
+      setImg(img3);
+      setAnimate(true);
     }, 5000);
     setTimeout(() => {
-      setBgc("#eedda9");
-      setFgc("#ebb618");
-      setImg(img4)
-      setAnimate(true)
+      setBgc("var(--background-light)");
+      setFgc("var(--primary-dark)");
+      setImg(img4);
+      setAnimate(true);
     }, 7500);
   };
 
   useEffect(() => {
+    // Simulate initial loading
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    
     updateMain();
-
     const intervalId = setInterval(updateMain, 10000);
-
     return () => clearInterval(intervalId);
   }, []);
 
@@ -67,102 +70,123 @@ const Home = () => {
   }, [animate]);
 
   const getStartedHandler = () => {
-    navigate('/createroom')
+    navigate('/createroom');
+  };
+
+  if (isLoading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+      </div>
+    );
   }
 
   return (
-    <div className="home_cont">
-
-      <div className="nav">
-        <img src={logo} alt="" />
-        <button onClick={() => getStartedHandler()} >Get Started</button>
-      </div>
-
-      <div className="home_main" style={{ backgroundColor: `${bgc}` }}>
-        <div className="home_main_left" style={{ backgroundColor: `${fgc}` }}>
-          <img className={animate ? "animate_img" : ""} src={img} alt="" />
+    <div className="home-container">
+      <nav className="nav">
+        <div className="nav-content">
+          <img src={logo} alt="Expense Splitter Logo" className="logo" />
+          <button className="btn" onClick={getStartedHandler}>
+            Get Started
+          </button>
         </div>
-        <div className="home_main_right">
-          <h1>
-            Travel Together,{" "}
-            <span style={{ color: `${fgc}` }}>Pay Together</span>
-          </h1>
-          <h2>Your Ultimate Expense Solution</h2>
-          <p>
-            "Experience the joy of group travel without the financial stress.
-            Try our expense splitter today and make every journey a shared
-            success."
-          </p>
+      </nav>
+
+      <main className="hero-section" style={{ backgroundColor: bgc }}>
+        <div className="hero-content">
+          <div className="hero-image" style={{ backgroundColor: fgc }}>
+            <img 
+              className={`hero-img ${animate ? "animate_img" : ""}`} 
+              src={img} 
+              alt="Expense Splitter Illustration" 
+            />
+          </div>
+          <div className="hero-text">
+            <h1>
+              Travel Together,{" "}
+              <span style={{ color: fgc }}>Pay Together</span>
+            </h1>
+            <h2>Your Ultimate Expense Solution</h2>
+            <p>
+              Experience the joy of group travel without the financial stress.
+              Try our expense splitter today and make every journey a shared
+              success.
+            </p>
+            <button className="btn cta-button" onClick={getStartedHandler}>
+              Start Splitting Expenses
+            </button>
+          </div>
         </div>
-      </div>
+      </main>
 
-      {/* step 1 */}
-
-      <div className="step1">
-        <div className="step1_left">
-            <h1>Start Using the Website</h1>
+      <section className="features-section">
+        <div className="feature-card">
+          <div className="feature-content">
+            <h2>Start Using the Website</h2>
             <p>Expense Splitter is the easiest way to share bills with friends. No registration, no password, totally free.</p>
+          </div>
+          <div className="feature-image">
+            <img src={step1img} alt="Getting Started" />
+          </div>
         </div>
-        <div className="step1_right">
-            <img src={step1img} alt="" />
-        </div>
-      </div>
 
-      {/* step 2 */}
-      <div className="step2 step1">
-        <div className="step2_left step1_right">
-            <img src={step2img} alt="" />
-        </div>
-        <div className="step2_right step1_left">
-            <h1>Create a Room</h1>
+        <div className="feature-card reverse">
+          <div className="feature-content">
+            <h2>Create a Room</h2>
             <p>Rooms help group members organize their expenses and provide a dedicated space for collaboration.</p>
+          </div>
+          <div className="feature-image">
+            <img src={step2img} alt="Create Room" />
+          </div>
         </div>
-      </div>
 
-      {/* step3 */}
-      <div className="step1 step3">
-        <div className="step1_left step3_left">
-            <h1>Add Expenses</h1>
+        <div className="feature-card">
+          <div className="feature-content">
+            <h2>Add Expenses</h2>
             <p>Easily record and track shared expenses within the room, simplifying expense management.</p>
+          </div>
+          <div className="feature-image">
+            <img src={step3img} alt="Add Expenses" />
+          </div>
         </div>
-        <div className="step1_right">
-            <img src={step3img} alt="" />
-        </div>
-      </div>
 
-      {/* step4 */}
-      <div className="step4 step1">
-        <div className="step4_left step1_right">
-            <img src={step4img} alt="" />
-        </div>
-        <div className="step4_right step1_left">
-            <h1>Settle Debts and Chat</h1>
+        <div className="feature-card reverse">
+          <div className="feature-content">
+            <h2>Settle Debts and Chat</h2>
             <p>Streamline debt settlement and facilitate communication among group members.</p>
+          </div>
+          <div className="feature-image">
+            <img src={step4img} alt="Settle Debts" />
+          </div>
         </div>
-      </div>
 
-      {/* step5 */}
-      <div className="step1">
-        <div className="step1_left step5_left">
-            <h1>View Reports and History</h1>
+        <div className="feature-card">
+          <div className="feature-content">
+            <h2>View Reports and History</h2>
             <p>Access reports and transaction history to keep track of expenses and resolve any disputes.</p>
+          </div>
+          <div className="feature-image">
+            <img src={step5img} alt="View Reports" />
+          </div>
         </div>
-        <div className="step1_right">
-            <img src={step5img} alt="" />
+      </section>
+
+      <section className="cta-section">
+        <div className="cta-content">
+          <h2>Ready to Start Splitting Expenses?</h2>
+          <p>Join thousands of users who trust Expense Splitter for their group expenses.</p>
+          <button className="btn cta-button" onClick={getStartedHandler}>
+            Get Started Now
+          </button>
         </div>
-      </div>
+      </section>
 
-      {/* get started */}
-      <div className="getstarted">
-        <button onClick={() => getStartedHandler()} >Get Started</button>
-      </div>
-
-      {/* footer */}
-      <div className="footer">
-        <div className="footer_line"></div>
-        <p>CopyRight @2023 Arpit Jain</p>
-      </div>
-
+      <footer className="footer">
+        <div className="footer-content">
+          <div className="footer-line"></div>
+          <p>© 2024 Expense Splitter. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 };

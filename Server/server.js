@@ -9,13 +9,16 @@ const connectDatabase = require("./config/database.js");
 
 const io = new Server(server, {
   cors: {
-    // origin: "http://localhost:3000",
+    origin: [
+      "http://localhost:5173", 
+      "https://expense-splitter-seven.vercel.app"  // Replace with your actual frontend domain
+    ],
     origin: "*",
     methods: ["GET", "POST"],
   },
 });
 
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 io.on("connection", (socket) => {
   console.log(`user connected ${socket.id}`);
@@ -50,16 +53,14 @@ io.on("connection", (socket) => {
     socket.join(roomId)
   })
 
-  socket.on("sendMessage", async ({ message, name, roomId }) => {
+  socket.on("sendMessage", async ({ message, userName, roomId }) => {
     const room = await Room.findOne({ roomId });
 
-    room.messages.push({ userName: name, message });
+    room.messages.push({ userName, message });
 
     await room.save();
 
-    // await saveMessages({roomId,message,userName: name})
-
-    io.to(roomId).emit("recieveMessage", { message, name, roomId });
+    io.to(roomId).emit("receiveMessage", { message, userName, roomId });
   });
 
   socket.on(

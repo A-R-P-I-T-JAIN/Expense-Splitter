@@ -2,53 +2,69 @@ import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchPayments } from "../../redux/roomSlice";
 import { liquification } from "./Liquification";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
-import { faTrash } from '@fortawesome/free-solid-svg-icons';
-import { faCircleInfo } from '@fortawesome/free-solid-svg-icons';
-
-// import { useAlert } from "react-alert";
+import { FiPlus, FiTrash2, FiInfo, FiX, FiCheck } from 'react-icons/fi';
 import toast, { Toaster } from 'react-hot-toast';
 
-const Expense = ({ socket, expense, members, host, id,userName }) => {
-  // const alert = useAlert()
+const Expense = ({ socket, members, host, id, userName }) => {
   const dispatch = useDispatch();
-  const ref = useRef()
-
+  const ref = useRef();
   const payments = useSelector((state) => state.room.payments);
 
-  const [dialog, setDialog] = useState(false);
+  const [showAddPayment, setShowAddPayment] = useState(false);
   const [paymentFor, setPaymentFor] = useState("");
   const [paymentBy, setPaymentBy] = useState("");
   const [amount, setAmount] = useState("");
-
   const [showPaymentInfo, setShowPaymentInfo] = useState(false);
-  const [pb, setPb] = useState("");
-  const [pf, setPf] = useState("");
-  const [am, setAm] = useState("");
-  const [pr, setPr] = useState();
-
+  const [paymentInfo, setPaymentInfo] = useState({});
   const [participants, setParticipants] = useState([]);
   const [liqarr, setLiqarr] = useState([]);
   const [checkboxStates, setCheckboxStates] = useState(
     Array.from({ length: members.length + 1 }, () => false)
   );
-  
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [paymentToDelete, setPaymentToDelete] = useState(null);
 
   useEffect(() => {
-    // Reset checkbox states when members array changes
     setCheckboxStates(Array.from({ length: members.length + 1 }, () => false));
   }, [members]);
 
   useEffect(() => {
-    liquify()
-  },[payments])
+    const liquify = () => {
+      if (!host || !members || !payments) return;
+      
+      const updatedMembers = [host, ...members.map(member => member.userName)];
+      const liquifiedArray = liquification({ 
+        members: updatedMembers, 
+        payments: payments.filter(p => p.paymentBy && p.amount > 0 && p.participants?.length > 0)
+      });
+      
+      const validLiquidation = liquifiedArray
+        .filter(item => item.amount > 0.01)
+        .map(item => ({
+          ...item,
+          amount: parseFloat(item.amount.toFixed(2))
+        }));
+      
+      setLiqarr(validLiquidation);
+    };
+
+    if (payments && payments.length > 0 && host && members) {
+      liquify();
+    } else {
+      setLiqarr([]);
+    }
+  }, [payments, host, members]);
 
   const saveHandler = () => {
+    if (!paymentBy || !paymentFor || !amount || participants.length === 0) {
+      toast.error("Please fill all details and select at least one participant");
+      return;
+    }
+
     socket.emit("addPayment", {
       paymentBy,
       paymentFor,
-      amount,
+      amount: parseFloat(amount),
       participants,
       roomId: id,
     });
@@ -57,239 +73,320 @@ const Expense = ({ socket, expense, members, host, id,userName }) => {
     setPaymentFor("");
     setAmount("");
     setParticipants([]);
-
     setCheckboxStates(Array.from({ length: members.length + 1 }, () => false));
-    if (ref.current) {
-      ref.current.checked = false;
-    }
-
-    setDialog(false);
+    if (ref.current) ref.current.checked = false;
+    setShowAddPayment(false);
   };
 
-  const checkboxhandler = ({ e, user,index }) => {
+  const checkboxhandler = ({ e, user, index }) => {
     const isChecked = e.target.checked;
-
-    setCheckboxStates((prevStates) => {
+    setCheckboxStates(prevStates => {
       const newStates = [...prevStates];
-      newStates[index+1] = isChecked;
+      newStates[index + 1] = isChecked;
       return newStates;
     }); 
+    setParticipants(prev => 
+      isChecked 
+        ? [...prev, user] 
+        : prev.filter(name => name !== user)
+    );
+  };
 
-    if (isChecked) {
-      setParticipants([...participants, user]);
-    } else {
-      setParticipants(participants.filter((name) => name !== user));
-    }
+  const selectAllHandler = (e) => {
+    const isChecked = e.target.checked;
+    const allMembers = [host, ...members.map(member => member.userName)];
+    setCheckboxStates(Array.from({ length: members.length + 1 }, () => isChecked));
+    setParticipants(isChecked ? allMembers : []);
+    if (ref.current) ref.current.checked = isChecked;
   };
 
   useEffect(() => {
     dispatch(fetchPayments({ roomId: id }));
-  }, [dispatch]);
+  }, [dispatch, id]);
 
   useEffect(() => {
-    socket.on("recievePayment", () => {
+    const handleReceivePayment = () => {
       dispatch(fetchPayments({ roomId: id }));
-      // alert.show("New Payment added")
-      toast.success("New Payment Added")
-    });
+      toast.success("New Payment Added");
+    };
 
-    socket.on("addPaymentFailed", () => {
-      toast.error("Fill all details!!")
-    });
-
-    socket.on("paymentDeleted",() => {
+    socket.on("recievePayment", handleReceivePayment);
+    socket.on("addPaymentFailed", () => toast.error("Fill all details!!"));
+    socket.on("paymentDeleted", () => {
       dispatch(fetchPayments({ roomId: id }));
-      toast.success("Payment Deleted")
-    })
+      toast.success("Payment Deleted");
+    });
 
     return () => {
-      socket.off("recievePayment");
+      socket.off("recievePayment", handleReceivePayment);
+      socket.off("addPaymentFailed");
+      socket.off("paymentDeleted");
     };
   }, [socket, dispatch, id]);
 
-  const liquify = () => {
-    const updatedMembers = [host]
-    for(let i = 0; i < members.length;i++){
-      updatedMembers.push(members[i].userName)
-      // updatedMembers.push(members[i])
-    }
-    // console.log(updatedMembers)
-    const liquifiedArray = liquification({members: updatedMembers,payments});
-    setLiqarr(liquifiedArray)
-  }
-
   const deleteHandler = (pId) => {
-      socket.emit("deletePayment",{pId,id})
-  }
+    setPaymentToDelete(pId);
+    setShowDeleteConfirm(true);
+  };
 
-  const paymentInfoHandler = (ele) => {
-    setPb(ele.paymentBy)
-    setPf(ele.paymentFor)
-    setAm(ele.amount)
-    setPr(ele.participants)
-    setShowPaymentInfo(true)
-  }
-  
+  const confirmDelete = () => {
+    socket.emit("deletePayment", { pId: paymentToDelete, id });
+    setShowDeleteConfirm(false);
+    setPaymentToDelete(null);
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirm(false);
+    setPaymentToDelete(null);
+  };
+
+  const paymentInfoHandler = (payment) => {
+    setPaymentInfo({
+      by: payment.paymentBy,
+      for: payment.paymentFor,
+      amount: payment.amount,
+      participants: payment.participants
+    });
+    setShowPaymentInfo(true);
+  };
 
   return (
-    <div
-      style={{ display: expense ? "" : "none" }}
-      className="room_chat room_expense "
-    >
-      <div style={{display: showPaymentInfo?"":"none"}} className="paymentInfo">
-        <div className="paymentInfoDialog">
-          <h1>Payment By : {pb}</h1>
-          <h1>Payment For : {pf}</h1>
-          <h1>amount : {am}</h1>
-          <div>
-            <h1>Members: </h1>
-            <div className="q">
-          {pr && pr.map((p) => (
-            <h2>{p},</h2>
-          ))}
-          </div>
-          </div>
-          
-          
-          <button onClick={() => setShowPaymentInfo(false)} >Back</button>
-        </div>
-      </div>
-  
-      <Toaster />
-      <div style={{ display: dialog ? "" : "none" }} className="dialog_cont">
-        <div className="dialog_main">
-          <h2>Payer</h2>
-          <select
-            value={paymentBy}
-            onChange={(e) => setPaymentBy(e.target.value)}
-            name=""
-            id=""
-          >
-            <option value="">Payer...</option>
-            <option value={host}>{host}</option>
-            {/* {members &&
-              members.map((member) => (
-                <option  value={member}>
-                  {" "}
-                  {member}
-                </option>
-              ))} */}
-            {members &&
-              members.map((member) => (
-                <option  value={member.userName}>
-                  {" "}
-                  {member.userName}
-                </option>
-              ))}
-          </select>
-          <h2>Payment of</h2>
-          <input
-            placeholder="what did you pay for....."
-            value={paymentFor}
-            onChange={(e) => setPaymentFor(e.target.value)}
-            type="text"
-          />
-          <h2>Price</h2>
-          <input
-            placeholder="Rs. 1000"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            type="number"
-            name=""
-            id=""
-          />
-          <h2>Payment for</h2>
-          <div>
-            <div>
-              <input
-                ref={ref}
-                onChange={(e) => checkboxhandler({ e, user: host })}
-                className="inpt"
-                type="checkbox"
-                name=""
-                id=""
-              />
-              <p>{host}</p>
+    <div className="expense-container">
+      <Toaster position="top-right" />
+      
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>Confirm Deletion</h2>
+            <p>Are you sure you want to delete this payment?</p>
+            <div className="modal-actions">
+              <button 
+                className="btn secondary"
+                onClick={cancelDelete}
+              >
+                <FiX /> Cancel
+              </button>
+              <button 
+                className="btn danger"
+                onClick={confirmDelete}
+              >
+                <FiTrash2 /> Delete
+              </button>
             </div>
-            {members &&
-              members.map((member,index) => (
-                <div >
+          </div>
+        </div>
+      )}
+
+      {/* Payment Info Dialog */}
+      {showPaymentInfo && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>Payment Details</h2>
+            <div className="payment-info-grid">
+              <div className="info-item">
+                <label>Paid By</label>
+                <p>{paymentInfo.by}</p>
+              </div>
+              <div className="info-item">
+                <label>Payment For</label>
+                <p>{paymentInfo.for}</p>
+              </div>
+              <div className="info-item">
+                <label>Amount</label>
+                <p>₹{paymentInfo.amount}</p>
+              </div>
+              <div className="info-item full-width">
+                <label>Participants</label>
+                <div className="participants-list">
+                  {paymentInfo.participants?.map((p, i) => (
+                    <span key={i} className="participant-tag">
+                      {p}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button 
+                className="btn primary"
+                onClick={() => setShowPaymentInfo(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Payment Dialog */}
+      {showAddPayment && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>Add New Payment</h2>
+            <div className="form-group">
+              <label>Payer</label>
+              <select
+                value={paymentBy}
+                onChange={(e) => setPaymentBy(e.target.value)}
+                required
+              >
+                <option value="">Select payer...</option>
+                <option value={host}>{host}</option>
+                {members.map((member) => (
+                  <option key={member.userName} value={member.userName}>
+                    {member.userName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Payment For</label>
+              <input
+                placeholder="What did you pay for..."
+                value={paymentFor}
+                onChange={(e) => setPaymentFor(e.target.value)}
+                type="text"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Amount</label>
+              <input
+                placeholder="₹1000"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                type="number"
+                min="0.01"
+                step="0.01"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Participants</label>
+              <div className="select-all-container">
+                <label className="checkbox-label">
                   <input
-                 checked={checkboxStates[index + 1]}
-                    onChange={(e) =>
-                      // checkboxhandler({ e, user: member })
-                      checkboxhandler({ e, user: member.userName,index })
-                    }
-                    className="inpt"
                     type="checkbox"
-                    name=""
-                    id=""
+                    onChange={selectAllHandler}
+                    ref={ref}
                   />
-                  <p>{member.userName}</p>
-                  {/* <p>{member}</p> */}
+                  <span>Select All</span>
+                </label>
+              </div>
+              <div className="participants-grid">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={checkboxStates[0]}
+                    onChange={(e) => checkboxhandler({ e, user: host, index: -1 })}
+                  />
+                  <span>{host} (Host)</span>
+                </label>
+                {members.map((member, index) => (
+                  <label key={member.userName} className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={checkboxStates[index + 1]}
+                      onChange={(e) => checkboxhandler({ e, user: member.userName, index })}
+                    />
+                    <span>{member.userName}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="modal-actions">
+              <button 
+                className="btn secondary"
+                onClick={() => setShowAddPayment(false)}
+              >
+                Cancel
+              </button>
+              <button 
+                className="btn primary"
+                onClick={saveHandler}
+                disabled={!paymentBy || !paymentFor || !amount || participants.length === 0}
+              >
+                Add Payment
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="expense-header">
+        <h2>Expenses</h2>
+        <button 
+          className="btn primary"
+          onClick={() => setShowAddPayment(true)}
+        >
+          <FiPlus /> Add Payment
+        </button>
+      </div>
+
+      <div className="expense-content">
+        <div className="payments-section">
+          <h3>Recent Payments</h3>
+          {payments && payments.length > 0 ? (
+            <div className="payments-list">
+              {payments.map((payment) => (
+                <div key={payment._id} className="payment-card">
+                  <div className="payment-info">
+                    <h4>{payment.paymentFor}</h4>
+                    <p>Paid by {payment.paymentBy}</p>
+                    <p className="amount">₹{payment.amount}</p>
+                  </div>
+                  <div className="payment-actions">
+                    <button 
+                      className="btn icon"
+                      onClick={() => paymentInfoHandler(payment)}
+                    >
+                      <FiInfo />
+                    </button>
+                    {userName === host && (
+                      <button 
+                        className="btn icon danger"
+                        onClick={() => deleteHandler(payment._id)}
+                      >
+                        <FiTrash2 />
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
-          </div>
-          <div className="dialog_btn">
-            <button onClick={() => saveHandler()}>Save</button>
-            <button
-              onClick={() => {
-                setDialog(false);
-              }}
-            >
-              Back
-            </button>
-          </div>
+            </div>
+          ) : (
+            <div className="no-payments">
+              No payments yet. Add your first payment!
+            </div>
+          )}
         </div>
-      </div>
 
-      <div className="room_expense_left">
-        <button
-          onClick={() => {
-            setDialog(true);
-          }}
-        >
-          Add Payment
-        </button>
-        <div className="payments">
-          {payments &&
-            payments.map((ele) => (
-              <div className="pay">
-                <div className="pay_left">
-                  <h1>{ele.paymentBy}</h1>
-                  <p>For {ele.paymentFor}</p>
+        <div className="liquidation-section">
+          <h3>Settlement Summary</h3>
+          {liqarr && liqarr.length > 0 ? (
+            <div className="liquidation-list">
+              {liqarr.map((item, index) => (
+                <div key={index} className="liquidation-card">
+                  <div className="liquidation-info">
+                    <p>
+                      <span className="payer">{item.payer}</span> should pay
+                      <span className="amount">₹{item.amount}</span> to
+                      <span className="receiver">{item.reciever}</span>
+                    </p>
+                  </div>
                 </div>
-                <div className="pay_right" style={{alignItems:"center",gap:"10px"}}>
-                  <p>Rs. {ele.amount}</p>
-                  <FontAwesomeIcon 
-                  style={{display: userName === host?"":"none"}} 
-                  onClick={() => deleteHandler(ele._id)}  
-                  icon={faTrash} />  
-                  <FontAwesomeIcon 
-                  icon={faCircleInfo}
-                  onClick={() => paymentInfoHandler(ele)} 
-                  />
-                </div>
-              </div>
-            ))}
-        </div>
-      </div>
-
-      <div className="room_expense_right">
-
-        <h1>Payment Liquidation</h1>
-
-        <div className="liquidation">
-            {/* <button onClick={liquify} >Liquify</button> */}
-            {liqarr && liqarr.map((ele) => (
-              <div>
-                <p className={ele.payer === userName?"self":""} >{ele.payer}</p>
-                <FontAwesomeIcon icon={faArrowRight} />                
-                <p>{ele.amount}₹</p>
-                <FontAwesomeIcon icon={faArrowRight} />  
-                <p className={ele.reciever === userName?"self":""} >{ele.reciever}</p>
-              </div>
-            ))}
+              ))}
+            </div>
+          ) : (
+            <div className="no-liquidation">
+              No settlements needed at the moment.
+            </div>
+          )}
         </div>
       </div>
     </div>

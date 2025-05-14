@@ -1,150 +1,111 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-export const createRoom = createAsyncThunk('room/createRoom',async({roomId,roomName,userName}) => {
-   
-  console.log("2")
-    let link = `https://expense-splitter.onrender.com/api/v1/createroom`
+// Base URL for the API
+const API_BASE_URL = 'http://localhost:3000/api/v1';
 
-    const config = { headers: { "Content-Type": "application/json" } };
+// Reusable Axios config
+const jsonConfig = { headers: { 'Content-Type': 'application/json' } };
 
-    const response = await axios.post(link,{roomId,roomName,userName},config);
-    console.log("3")
+// Helper function to create POST thunks
+const createPostThunk = (name, endpoint) => createAsyncThunk(
+  name,
+  async (payload, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/${endpoint}`, payload, jsonConfig);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
 
-    return response.data;
-});
+// Helper function to create GET thunks
+const createGetThunk = (name, endpoint) => createAsyncThunk(
+  name,
+  async ({ roomId }, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/${endpoint}/${roomId}`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
 
-export const joinRoom = createAsyncThunk('room/joinRoom',async({joinRoomId,userName}) => {
-  let link = `https://expense-splitter.onrender.com/api/v1/joinroom`
-
-    const config = { headers: { "Content-Type": "application/json" } };
-
-    const response = await axios.post(link,{joinRoomId,userName},config);
-
-    return response.data;
-})
-
-export const addMember = createAsyncThunk('member/addMember',async({roomId,memberName}) => {
-  let link = `https://expense-splitter.onrender.com/api/v1/addmember`
-  console.log(roomId)
-
-    const config = { headers: { "Content-Type": "application/json" } };
-
-    const response = await axios.post(link,{roomId,memberName},config);
-
-    return response.data;
-})
-
-export const fetchMembers = createAsyncThunk('members/fetchMembers',async({roomId}) => {
-  let link = `https://expense-splitter.onrender.com/api/v1/members/${roomId}`
-
-    // const config = { headers: { "Content-Type": "application/json" } };
-
-    const response = await axios.get(link);
-    return response.data;
-})
-
-export const fetchHost = createAsyncThunk('host/fetchHost',async({roomId}) => {
-  let link = `https://expense-splitter.onrender.com/api/v1/host/${roomId}`
-
-  const response = await axios.get(link);
-  return response.data;
-})
-
-export const fetchRoomName = createAsyncThunk('roomName/fetchRoomName',async({roomId}) => {
-  let link = `https://expense-splitter.onrender.com/api/v1/roomname/${roomId}`
-
-  const response = await axios.get(link);
-  return response.data;
-})
-
-export const fetchMessages = createAsyncThunk('messages/fetchMessages',async({roomId}) => {
-  let link = `https://expense-splitter.onrender.com/api/v1/messages/${roomId}`
-
-  const response = await axios.get(link);
-  return response.data;
-})
-
-
-export const fetchPayments = createAsyncThunk('payments/fetchPayments',async({roomId}) => {
-  let link = `https://expense-splitter.onrender.com/api/v1/payments/${roomId}`
-
-  const response = await axios.get(link);
-  return response.data;
-})
-
-export const isRoom = createAsyncThunk('room/isRoom',async({roomId}) => {
-  let link = `https://expense-splitter.onrender.com/api/v1/isRoom`
-
-  const response = await axios.post(link,{roomId});
-  return response.data;
-})
+// Async thunks
+export const createRoom = createPostThunk('room/createRoom', 'createroom');
+export const joinRoom = createPostThunk('room/joinRoom', 'joinroom');
+export const addMember = createPostThunk('member/addMember', 'addmember');
+export const isRoom = createPostThunk('room/isRoom', 'isRoom');
+export const fetchMembers = createGetThunk('members/fetchMembers', 'members');
+export const fetchHost = createGetThunk('host/fetchHost', 'host');
+export const fetchRoomName = createGetThunk('roomName/fetchRoomName', 'roomname');
+export const fetchMessages = createGetThunk('messages/fetchMessages', 'messages');
+export const fetchPayments = createGetThunk('payments/fetchPayments', 'payments');
 
 const roomSlice = createSlice({
-    name: 'room',
-    initialState: {
-      members: [],
-      host: "",
-      messages: [],
-      isLoading: false,
-      payments:[],
-      roomName: "",
-      isRoom: false
+  name: 'room',
+  initialState: {
+    members: [],
+    host: '',
+    messages: [],
+    isLoading: false,
+    payments: [],
+    roomName: '',
+    isRoom: false,
+    error: null,
+  },
+  reducers: {
+    setError: (state, action) => {
+      state.error = action.payload;
     },
-    reducers: {},
-    extraReducers: (builder) => {
+    clearError: (state) => {
+      state.error = null;
+    },
+  },
+  extraReducers: (builder) => {
+    // Helper to handle common reducer cases
+    const addAsyncCases = (thunk, fulfilledHandler) => {
       builder
-        .addCase(createRoom.pending, (state) => {
-            state.isLoading = true;
+        .addCase(thunk.pending, (state) => {
+          state.isLoading = true;
+          state.error = null;
         })
-        .addCase(createRoom.fulfilled, (state) => {
-            console.log("room created");
-            state.isLoading = false;
+        .addCase(thunk.fulfilled, (state, action) => {
+          state.isLoading = false;
+          fulfilledHandler(state, action);
         })
-        .addCase(joinRoom.pending, (state) => {
-            state.isLoading = true;
-        })
-        .addCase(joinRoom.fulfilled, (state) => {
-            console.log("room joined");
-            state.isLoading = false;
-        })
-        .addCase(fetchMembers.pending, (state,action) => {
-            state.isLoading = true
-        })
-        .addCase(fetchMembers.fulfilled, (state,action) => {
-            state.members = action.payload.members
-            state.isLoading = false
-        })
-        .addCase(fetchHost.pending, (state,action) => {
-            state.isLoading = true
-        })
-        .addCase(fetchHost.fulfilled, (state,action) => {
-            state.host = action.payload.host
-            state.isLoading = false
-        })
-        .addCase(fetchRoomName.pending, (state,action) => {
-            state.isLoading = true
-        })
-        .addCase(fetchRoomName.fulfilled, (state,action) => {
-            state.roomName = action.payload.roomName
-            state.isLoading = false
-        })
-        .addCase(fetchMessages.pending, (state,action) => {
-            state.isLoading = true
-        })
-        .addCase(fetchMessages.fulfilled, (state,action) => {
-            state.messages = action.payload.messages
-            state.isLoading = false
-        })
-        .addCase(fetchPayments.fulfilled, (state,action) => {
-            state.payments = action.payload.payments
-            state.isLoading = false
-        })
-        .addCase(isRoom.fulfilled, (state,action) => {
-            state.isRoom = action.payload.isRoom
-        })
-        
-    },
-  });
-  
-  export default roomSlice.reducer;
+        .addCase(thunk.rejected, (state, action) => {
+          state.isLoading = false;
+          state.error = action.payload || action.error.message;
+        });
+    };
+
+    // Define fulfilled handlers
+    addAsyncCases(createRoom, () => console.log('room created'));
+    addAsyncCases(joinRoom, () => console.log('room joined'));
+    addAsyncCases(fetchMembers, (state, action) => {
+      state.members = action.payload.members || [];
+    });
+    addAsyncCases(fetchHost, (state, action) => {
+      state.host = action.payload.host || '';
+    });
+    addAsyncCases(fetchRoomName, (state, action) => {
+      state.roomName = action.payload.roomName || '';
+    });
+    addAsyncCases(fetchMessages, (state, action) => {
+      state.messages = action.payload.messages || [];
+    });
+    addAsyncCases(fetchPayments, (state, action) => {
+      state.payments = action.payload.payments || [];
+    });
+    addAsyncCases(isRoom, (state, action) => {
+      state.isRoom = action.payload.isRoom || false;
+    });
+    addAsyncCases(addMember, () => {});
+  },
+});
+
+export const { setError, clearError } = roomSlice.actions;
+export default roomSlice.reducer;

@@ -1,43 +1,60 @@
-import React from 'react'
+import React from 'react';
+import { FiUsers, FiHash, FiUser } from 'react-icons/fi';
 
-const RoomInfo = ({info,roomName,id,host,members}) => {
+const RoomInfo = ({ roomName, id, host, members }) => {
   return (
-    <div style={{ display: info ? "" : "none" }} className='room_chat room_info'>
-
-        <div className="room_info_left">
-
-        <div>
-            <h1>Room Name:</h1>
+    <div className="room-info-container">
+      <div className="room-info-section">
+        <div className="info-card">
+          <div className="info-icon">
+            <FiHash />
+          </div>
+          <div className="info-content">
+            <h3>Room Name</h3>
             <p>{roomName}</p>
+          </div>
         </div>
-        
-        <div>
-            <h1>Room Code:</h1>
+
+        <div className="info-card">
+          <div className="info-icon">
+            <FiHash />
+          </div>
+          <div className="info-content">
+            <h3>Room Code</h3>
             <p>{id}</p>
+          </div>
         </div>
-        
-        <div>
-            <h1>Host:</h1>
+
+        <div className="info-card">
+          <div className="info-icon">
+            <FiUser />
+          </div>
+          <div className="info-content">
+            <h3>Host</h3>
             <p>{host}</p>
+          </div>
         </div>
-    
-        </div>
+      </div>
 
-        <div className="room_info_right">
-            <h1>Members:</h1>
-            <div>
-            {members.map((member,i) => (
-                // <p>({i+1}) {member}</p>
-                <p>({i+1}) {member.userName}</p>
-            ))}
+      <div className="members-section">
+        <div className="section-header">
+          <FiUsers />
+          <h2>Members</h2>
+        </div>
+        <div className="members-list">
+          {members.map((member, index) => (
+            <div key={member.userName} className="member-item">
+              <span className="member-number">{index + 1}</span>
+              <span className="member-name">{member.userName}</span>
+              {member.userName === host && (
+                <span className="host-badge">Host</span>
+              )}
             </div>
-            
+          ))}
         </div>
-
-        
-      
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default RoomInfo
+export default RoomInfo;

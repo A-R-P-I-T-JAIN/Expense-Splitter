@@ -8,7 +8,10 @@ import io from 'socket.io-client';
 import AnimatedCursor from 'react-animated-cursor';
 
 // const socket = io('http://localhost:3000');
-const socket = io('https://expense-splitter.onrender.com');
+const socket = io("https://expense-splitter.onrender.com", {
+  transports: ["websocket", "polling"],
+  withCredentials: true
+});
 // const socket = io();
 // const socket = io('https://expense-splitter.onrender.com');
 

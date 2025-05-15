@@ -32,7 +32,7 @@ function App() {
 
   return (
     <>
-      {showCursor && (
+      {/* {showCursor && (
         <AnimatedCursor
           innerSize={8}
           outerSize={50}
@@ -54,7 +54,7 @@ function App() {
             '.link',
           ]}
         />
-      )}
+      )} */}
       <Router>
         <Routes>
           <Route path='/' element={<Home />} />

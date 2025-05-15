@@ -147,7 +147,7 @@
 /* Header styles */
 .room-header {
   background-color: white;
-  padding: 1rem 2rem;
+  padding: 0.2rem 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -160,7 +160,9 @@
 .room-info {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.1rem;
+  margin: 0;
+  padding: 1rem 0.5rem;
 }
 
 .room-name {
@@ -263,7 +265,7 @@
 .room-nav {
   display: flex;
   gap: 1rem;
-  padding: 0.5rem;
+  padding: 0.2rem;
   background-color: white;
   border-radius: var(--border-radius);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -369,11 +371,15 @@
 /* Responsive design */
 @media (max-width: 768px) {
   .room-header {
-    padding: 1rem;
+    padding: 0.5rem;
   }
 
   .room-name {
     font-size: 1.25rem;
+  }
+
+  .room-id {
+    display: none;
   }
 
   .room-content {
@@ -393,6 +399,10 @@
   .add-member-btn {
     width: 100%;
     justify-content: center;
+  }
+
+  .room-info {
+    display: none;
   }
 }
 
@@ -790,6 +800,14 @@
 .liquidation-info .receiver {
   font-weight: 600;
   color: var(--primary-color);
+}
+
+.liquidation-info .current-user {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.25rem;
+  font-weight: 600;
 }
 
 .liquidation-info .amount {

@@ -4,13 +4,9 @@ import img1 from "../../assets/g1.png";
 import img2 from "../../assets/g2.png";
 import img3 from "../../assets/g3.png";
 import img4 from "../../assets/g4.png";
-import step1img from '../../assets/step1img.png'
-import step2img from '../../assets/step2img.png'
-import step3img from '../../assets/step3img.png'
-import step4img from '../../assets/step4img.png'
-import step5img from '../../assets/step5img.png'
 import { useNavigate } from "react-router-dom";
-import logo from "../../assets/splitter_logo.png"
+import logo from "../../assets/splitter_logo.png";
+import { FiUsers, FiMessageSquare, FiDollarSign, FiCheck } from 'react-icons/fi';
 
 const Home = () => {
   const [bgc, setBgc] = useState("");
@@ -48,7 +44,6 @@ const Home = () => {
   };
 
   useEffect(() => {
-    // Simulate initial loading
     setTimeout(() => {
       setIsLoading(false);
     }, 1000);
@@ -86,7 +81,7 @@ const Home = () => {
       <nav className="nav">
         <div className="nav-content">
           <img src={logo} alt="Expense Splitter Logo" className="logo" />
-          <button className="btn" onClick={getStartedHandler}>
+          <button className="btn nav-button" onClick={getStartedHandler}>
             Get Started
           </button>
         </div>
@@ -112,7 +107,7 @@ const Home = () => {
               Try our expense splitter today and make every journey a shared
               success.
             </p>
-            <button className="btn cta-button" onClick={getStartedHandler}>
+            <button className="btn primary-button" onClick={getStartedHandler}>
               Start Splitting Expenses
             </button>
           </div>
@@ -120,70 +115,37 @@ const Home = () => {
       </main>
 
       <section className="features-section">
-        <div className="feature-card">
-          <div className="feature-content">
-            <h2>Start Using the Website</h2>
-            <p>Expense Splitter is the easiest way to share bills with friends. No registration, no password, totally free.</p>
-          </div>
-          <div className="feature-image">
-            <img src={step1img} alt="Getting Started" />
-          </div>
+        <div className="section-header">
+          <h2>How It Works</h2>
+          <p>Simple steps to manage your group expenses</p>
         </div>
-
-        <div className="feature-card reverse">
-          <div className="feature-content">
-            <h2>Create a Room</h2>
-            <p>Rooms help group members organize their expenses and provide a dedicated space for collaboration.</p>
+        <div className="simple-steps">
+          <div className="step">
+            <div className="step-icon">
+              <FiUsers />
+            </div>
+            <h3>Create Room</h3>
+            <p>Create a room and invite your friends</p>
           </div>
-          <div className="feature-image">
-            <img src={step2img} alt="Create Room" />
+          <div className="step">
+            <div className="step-icon">
+              <FiDollarSign />
+            </div>
+            <h3>Add Expenses</h3>
+            <p>Record shared expenses easily</p>
           </div>
-        </div>
-
-        <div className="feature-card">
-          <div className="feature-content">
-            <h2>Add Expenses</h2>
-            <p>Easily record and track shared expenses within the room, simplifying expense management.</p>
-          </div>
-          <div className="feature-image">
-            <img src={step3img} alt="Add Expenses" />
-          </div>
-        </div>
-
-        <div className="feature-card reverse">
-          <div className="feature-content">
-            <h2>Settle Debts and Chat</h2>
-            <p>Streamline debt settlement and facilitate communication among group members.</p>
-          </div>
-          <div className="feature-image">
-            <img src={step4img} alt="Settle Debts" />
-          </div>
-        </div>
-
-        <div className="feature-card">
-          <div className="feature-content">
-            <h2>View Reports and History</h2>
-            <p>Access reports and transaction history to keep track of expenses and resolve any disputes.</p>
-          </div>
-          <div className="feature-image">
-            <img src={step5img} alt="View Reports" />
+          <div className="step">
+            <div className="step-icon">
+              <FiMessageSquare />
+            </div>
+            <h3>Chat & Settle</h3>
+            <p>Communicate and settle debts</p>
           </div>
         </div>
       </section>
 
-      <section className="cta-section">
-        <div className="cta-content">
-          <h2>Ready to Start Splitting Expenses?</h2>
-          <p>Join thousands of users who trust Expense Splitter for their group expenses.</p>
-          <button className="btn cta-button" onClick={getStartedHandler}>
-            Get Started Now
-          </button>
-        </div>
-      </section>
-
-      <footer className="footer">
+      <footer className="simple-footer">
         <div className="footer-content">
-          <div className="footer-line"></div>
           <p>© 2024 Expense Splitter. All rights reserved.</p>
         </div>
       </footer>

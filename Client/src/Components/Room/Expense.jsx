@@ -376,9 +376,13 @@ const Expense = ({ socket, members, host, id, userName }) => {
                 <div key={index} className="liquidation-card">
                   <div className="liquidation-info">
                     <p>
-                      <span className="payer">{item.payer}</span> should pay
-                      <span className="amount">₹{item.amount}</span> to
-                      <span className="receiver">{item.reciever}</span>
+                      <span className={`payer ${item.payer === userName ? 'current-user' : ''}`}>
+                        {item.payer}
+                      </span> should pay
+                      <span className="amount">₹{item.amount}</span> to <tt></tt>
+                      <span className={`receiver ${item.reciever === userName ? 'current-user' : ''}`}>
+                        {item.reciever}
+                      </span>
                     </p>
                   </div>
                 </div>

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchPayments } from "../../redux/roomSlice";
 import { liquification } from "./Liquification";
-import { FiPlus, FiTrash2, FiInfo, FiX, FiCheck } from 'react-icons/fi';
+import { FiPlus, FiTrash2, FiInfo, FiX, FiCheck, FiDollarSign, FiArrowRight } from 'react-icons/fi';
 import toast, { Toaster } from 'react-hot-toast';
 
 const Expense = ({ socket, members, host, id, userName }) => {
@@ -201,9 +201,9 @@ const Expense = ({ socket, members, host, id, userName }) => {
               <div className="info-item full-width">
                 <label>Participants</label>
                 <div className="participants-list">
-                  {paymentInfo.participants?.map((p, i) => (
-                    <span key={i} className="participant-tag">
-                      {p}
+                  {paymentInfo.participants?.map((participant, index) => (
+                    <span key={index} className="participant-tag">
+                      {participant}
                     </span>
                   ))}
                 </div>
@@ -227,14 +227,22 @@ const Expense = ({ socket, members, host, id, userName }) => {
           <div className="modal-content">
             <h2>Add New Payment</h2>
             <div className="form-group">
-              <label>Payer</label>
+              <label>Payment For</label>
+              <input
+                type="text"
+                value={paymentFor}
+                onChange={(e) => setPaymentFor(e.target.value)}
+                placeholder="e.g., Dinner, Movie tickets"
+              />
+            </div>
+            <div className="form-group">
+              <label>Paid By</label>
               <select
                 value={paymentBy}
                 onChange={(e) => setPaymentBy(e.target.value)}
-                required
               >
-                <option value="">Select payer...</option>
-                <option value={host}>{host}</option>
+                <option value="">Select who paid</option>
+                <option value={host}>{host} (Host)</option>
                 {members.map((member) => (
                   <option key={member.userName} value={member.userName}>
                     {member.userName}
@@ -242,78 +250,65 @@ const Expense = ({ socket, members, host, id, userName }) => {
                 ))}
               </select>
             </div>
-
             <div className="form-group">
-              <label>Payment For</label>
+              <label>Amount (₹)</label>
               <input
-                placeholder="What did you pay for..."
-                value={paymentFor}
-                onChange={(e) => setPaymentFor(e.target.value)}
-                type="text"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Amount</label>
-              <input
-                placeholder="₹1000"
+                type="number"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                type="number"
-                min="0.01"
+                placeholder="Enter amount"
+                min="0"
                 step="0.01"
-                required
               />
             </div>
-
             <div className="form-group">
               <label>Participants</label>
-              <div className="select-all-container">
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    onChange={selectAllHandler}
-                    ref={ref}
-                  />
-                  <span>Select All</span>
-                </label>
+              <div className="checkbox-label">
+                <input
+                  type="checkbox"
+                  onChange={selectAllHandler}
+                  ref={ref}
+                />
+                Select All
               </div>
               <div className="participants-grid">
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={checkboxStates[0]}
-                    onChange={(e) => checkboxhandler({ e, user: host, index: -1 })}
-                  />
-                  <span>{host} (Host)</span>
-                </label>
-                {members.map((member, index) => (
-                  <label key={member.userName} className="checkbox-label">
+                {host && (
+                  <div className="checkbox-label">
                     <input
                       type="checkbox"
-                      checked={checkboxStates[index + 1]}
-                      onChange={(e) => checkboxhandler({ e, user: member.userName, index })}
+                      checked={checkboxStates[1]}
+                      onChange={(e) => checkboxhandler({ e, user: host, index: 0 })}
                     />
-                    <span>{member.userName}</span>
-                  </label>
+                    {host} (Host)
+                  </div>
+                )}
+                {members.map((member, index) => (
+                  <div className="checkbox-label" key={member.userName}>
+                    <input
+                      type="checkbox"
+                      checked={checkboxStates[index + 2]}
+                      onChange={(e) =>
+                        checkboxhandler({ e, user: member.userName, index: index + 1 })
+                      }
+                    />
+                    {member.userName}
+                  </div>
                 ))}
               </div>
             </div>
-
             <div className="modal-actions">
               <button 
                 className="btn secondary"
                 onClick={() => setShowAddPayment(false)}
               >
-                Cancel
+                <FiX /> Cancel
               </button>
               <button 
                 className="btn primary"
                 onClick={saveHandler}
                 disabled={!paymentBy || !paymentFor || !amount || participants.length === 0}
               >
-                Add Payment
+                <FiCheck /> Save Payment
               </button>
             </div>
           </div>
@@ -321,40 +316,49 @@ const Expense = ({ socket, members, host, id, userName }) => {
       )}
 
       <div className="expense-header">
-        <h2>Expenses</h2>
-        <button 
-          className="btn primary"
-          onClick={() => setShowAddPayment(true)}
-        >
-          <FiPlus /> Add Payment
-        </button>
+        <h2>Expense Manager</h2>
       </div>
 
       <div className="expense-content">
         <div className="payments-section">
-          <h3>Recent Payments</h3>
+          <div className="section-actions">
+            <h3><FiDollarSign /> Payments</h3>
+            <button 
+              className="add-payment-btn"
+              onClick={() => setShowAddPayment(true)}
+            >
+              <FiPlus /> Add Payment
+            </button>
+          </div>
+          
           {payments && payments.length > 0 ? (
             <div className="payments-list">
               {payments.map((payment) => (
-                <div key={payment._id} className="payment-card">
+                <div className="payment-card" key={payment._id}>
                   <div className="payment-info">
                     <h4>{payment.paymentFor}</h4>
-                    <p>Paid by {payment.paymentBy}</p>
-                    <p className="amount">₹{payment.amount}</p>
+                    <p>
+                      Paid by: <strong>{payment.paymentBy}</strong>
+                    </p>
+                    <p>
+                      Amount: <span className="amount">₹{payment.amount}</span>
+                    </p>
                   </div>
                   <div className="payment-actions">
-                    <button 
+                    <button
                       className="btn icon"
                       onClick={() => paymentInfoHandler(payment)}
+                      aria-label="View payment details"
                     >
                       <FiInfo />
                     </button>
-                    {userName === host && (
-                      <button 
-                        className="btn icon danger"
+                    {(userName === host || userName === payment.paymentBy) && (
+                      <button
+                        className="btn icon"
                         onClick={() => deleteHandler(payment._id)}
+                        aria-label="Delete payment"
                       >
-                        <FiTrash2 />
+                        <FiTrash2 className="delete-icon" />
                       </button>
                     )}
                   </div>
@@ -363,123 +367,41 @@ const Expense = ({ socket, members, host, id, userName }) => {
             </div>
           ) : (
             <div className="no-payments">
-              No payments yet. Add your first payment!
+              No payments added yet. Click "Add Payment" to get started.
             </div>
           )}
         </div>
 
         <div className="liquidation-section">
-          <h3>Settlement Summary</h3>
+          <h3><FiArrowRight /> Settlements</h3>
           {liqarr && liqarr.length > 0 ? (
             <div className="liquidation-list">
               {liqarr.map((item, index) => (
-                <div key={index} className="liquidation-card">
+                <div className="liquidation-card" key={index}>
                   <div className="liquidation-info">
                     <p>
-                      <span className={`payer ${item.payer === userName ? 'current-user' : ''}`}>
+                      <span className={item.payer === userName ? 'current-user' : 'payer'}>
                         {item.payer}
-                      </span> should pay
-                      <span className="amount">₹{item.amount}</span> to <tt></tt>
-                      <span className={`receiver ${item.reciever === userName ? 'current-user' : ''}`}>
+                      </span>
+                      {' '} should pay {' '}
+                      <span className={item.reciever === userName ? 'current-user' : 'receiver'}>
                         {item.reciever}
                       </span>
+                    </p>
+                    <p>
+                      Amount: <span className="amount">₹{item.amount}</span>
                     </p>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="no-liquidation">
-              No settlements needed at the moment.
+            <div className="no-liquidations">
+              No settlements to show. Add some payments first.
             </div>
           )}
         </div>
       </div>
-
-      <style jsx>{`
-        .delete-confirm-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background-color: rgba(0, 0, 0, 0.5);
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          z-index: 1000;
-        }
-
-        .delete-confirm-dialog {
-          background-color: white;
-          padding: 20px;
-          border-radius: 8px;
-          width: 300px;
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .delete-confirm-dialog h3 {
-          margin-top: 0;
-          color: #333;
-        }
-
-        .delete-confirm-dialog p {
-          margin-bottom: 20px;
-          color: #666;
-        }
-
-        .delete-confirm-actions {
-          display: flex;
-          justify-content: flex-end;
-          gap: 10px;
-        }
-
-        .delete-confirm-btn {
-          padding: 8px 16px;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-          font-weight: 500;
-        }
-
-        .delete-confirm-cancel {
-          background-color: #f0f0f0;
-          color: #333;
-        }
-
-        .delete-confirm-cancel:hover {
-          background-color: #e0e0e0;
-        }
-
-        .delete-confirm-proceed {
-          background-color: #ff4d4f;
-          color: white;
-        }
-
-        .delete-confirm-proceed:hover {
-          background-color: #ff7875;
-        }
-
-        .delete-icon {
-          color: #ff4d4f;
-          cursor: pointer;
-          transition: color 0.2s;
-        }
-
-        .delete-icon:hover {
-          color: #ff7875;
-        }
-
-        .info-icon {
-          color: #1890ff;
-          cursor: pointer;
-          transition: color 0.2s;
-        }
-
-        .info-icon:hover {
-          color: #40a9ff;
-        }
-      `}</style>
     </div>
   );
 };

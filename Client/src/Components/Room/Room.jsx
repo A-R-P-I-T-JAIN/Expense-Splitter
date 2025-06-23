@@ -13,10 +13,14 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import Chat from "./Chat";
 import Expense from "./Expense";
 import RoomInfo from "./RoomInfo";
+import Settlements from "./Settlements";
 import History from "./History";
 import Loader from "./Loader";
 import toast, { Toaster } from 'react-hot-toast';
-import { FiUsers, FiMessageSquare, FiDollarSign, FiInfo } from 'react-icons/fi';
+import { 
+  FiUsers, FiMessageSquare, FiDollarSign, FiInfo, 
+  FiX, FiCheck, FiCopy, FiMenu, FiChevronLeft, FiFileText, FiShare2
+} from 'react-icons/fi';
 
 const Room = ({ socket }) => {
   const dispatch = useDispatch();
@@ -40,6 +44,11 @@ const Room = ({ socket }) => {
   const [membersList, setMembersList] = useState(!un);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [isDataLoading, setIsDataLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [shareLink, setShareLink] = useState("");
+  const [sharedLinkCopied, setSharedLinkCopied] = useState(false);
 
   // Fetch initial data
   useEffect(() => {
@@ -53,7 +62,6 @@ const Room = ({ socket }) => {
         await dispatch(fetchPayments({ roomId: id })).unwrap();
         setInitialLoadComplete(true);
         setIsDataLoading(false);
-        console.log("Initial data fetched successfully");
       } catch (error) {
         console.error("Error fetching initial data:", error);
         toast.error("Failed to load room data. Please try again.");
@@ -73,7 +81,6 @@ const Room = ({ socket }) => {
     
     // Make sure socket is connected
     if (!socket.connected) {
-      console.log("Socket not connected, attempting to connect...");
       socket.connect();
     }
     
@@ -82,7 +89,35 @@ const Room = ({ socket }) => {
     };
   }, [socket, dispatch]);
 
+  // Check if on mobile and close sidebar by default
+  useEffect(() => {
+    const checkMobile = () => {
+      if (window.innerWidth < 768) {
+        setSidebarOpen(false);
+      }
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Generate share link when dialog opens
+  useEffect(() => {
+    if (showShareDialog) {
+      const baseUrl = window.location.origin;
+      const roomUrl = `${baseUrl}/room/${id}?userName=`;
+      setShareLink(roomUrl);
+    }
+  }, [showShareDialog, id]);
+
   const addMemberHandler = () => {
+    if (!memberName.trim()) {
+      toast.error("Please enter a member name");
+      return;
+    }
+    
     socket.emit("addMember", { memberName, roomId: id });
     setMemberName("");
     setOpenAddMemberDialog(false);
@@ -96,28 +131,30 @@ const Room = ({ socket }) => {
     }
     socket.emit("joinRoom2", { roomId: id });
     setMembersList(false);
-    toast.success("Welcome to the room!");
+    toast.success(`Welcome to the room, ${userName}!`);
   };
 
-  // Debug logging
-  useEffect(() => {
-    console.log("Active tab:", activeTab);
-    console.log("Is loading:", isLoading);
-    console.log("Initial load complete:", initialLoadComplete);
-    console.log("Is data loading:", isDataLoading);
-  }, [activeTab, isLoading, initialLoadComplete, isDataLoading]);
+  const copyRoomId = () => {
+    navigator.clipboard.writeText(id);
+    setCopied(true);
+    toast.success("Room ID copied to clipboard!");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const copyShareLink = () => {
+    navigator.clipboard.writeText(shareLink);
+    setSharedLinkCopied(true);
+    toast.success("Share link copied to clipboard!");
+    setTimeout(() => setSharedLinkCopied(false), 2000);
+  };
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
 
   if (isDataLoading || (isLoading && !initialLoadComplete)) {
-    console.log("Showing loader");
     return (
-      <div className="loading-container" style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh',
-        width: '100vw',
-        backgroundColor: 'transparent'
-      }}>
+      <div className="loading-container">
         <Loader />
       </div>
     );
@@ -128,11 +165,32 @@ const Room = ({ socket }) => {
       <Toaster position="top-right" />
       
       <header className="room-header">
-        <div className="room-info">
-          <h1 className="room-name">{roomName || "Loading Room..."}</h1>
-          <p className="room-id">Room ID: {id}</p>
+        <div className="header-left">
+          <button 
+            className="menu-toggle"
+            onClick={toggleSidebar}
+            aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+          >
+            {sidebarOpen ? <FiChevronLeft /> : <FiMenu />}
+          </button>
+          <div className="room-info">
+            <h1 className="room-name" title={roomName || "Loading Room..."}>
+              {roomName || "Loading Room..."}
+              <span className="room-id-badge" onClick={copyRoomId} title={`Copy Room ID: ${id}`}>
+                {copied ? <FiCheck /> : <FiCopy />} {id.substring(0, 8)}...
+              </span>
+            </h1>
+          </div>
         </div>
         <div className="user-info">
+          <button 
+            className="share-button"
+            onClick={() => setShowShareDialog(true)}
+            aria-label="Share room"
+            title="Share room with others"
+          >
+            <FiShare2 />
+          </button>
           <span className="user-name">{userName}</span>
           {userName === host && <span className="host-badge">Host</span>}
         </div>
@@ -163,65 +221,86 @@ const Room = ({ socket }) => {
         </div>
       )}
 
-      <div className="room-content">
-        <nav className="room-nav">
-          <button
-            className={`nav-btn ${activeTab === 'expense' ? 'active' : ''}`}
-            onClick={() => setActiveTab('expense')}
-          >
-            <FiDollarSign />
-            <span>Expenses</span>
-          </button>
-          <button
-            className={`nav-btn ${activeTab === 'chat' ? 'active' : ''}`}
-            onClick={() => setActiveTab('chat')}
-          >
-            <FiMessageSquare />
-            <span>Chat</span>
-          </button>
-          <button
-            className={`nav-btn ${activeTab === 'info' ? 'active' : ''}`}
-            onClick={() => setActiveTab('info')}
-          >
-            <FiInfo />
-            <span>Room Info</span>
-          </button>
-          {userName === host && (
+      <div className="room-layout">
+        <aside className={`room-sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
+          <nav className="sidebar-nav">
             <button
-              className="add-member-btn"
-              onClick={() => setOpenAddMemberDialog(true)}
+              className={`nav-btn ${activeTab === 'expense' ? 'active' : ''}`}
+              onClick={() => setActiveTab('expense')}
             >
-              <FiUsers />
-              <span>Add Member</span>
+              <FiDollarSign />
+              <span>Expenses</span>
             </button>
-          )}
-        </nav>
+            <button
+              className={`nav-btn ${activeTab === 'settlements' ? 'active' : ''}`}
+              onClick={() => setActiveTab('settlements')}
+            >
+              <FiFileText />
+              <span>Settlements</span>
+            </button>
+            <button
+              className={`nav-btn ${activeTab === 'chat' ? 'active' : ''}`}
+              onClick={() => setActiveTab('chat')}
+            >
+              <FiMessageSquare />
+              <span>Chat</span>
+            </button>
+            <button
+              className={`nav-btn ${activeTab === 'info' ? 'active' : ''}`}
+              onClick={() => setActiveTab('info')}
+            >
+              <FiInfo />
+              <span>Room Info</span>
+            </button>
+            
+            <div className="sidebar-footer">
+              {userName === host && (
+                <button
+                  className="add-member-btn"
+                  onClick={() => setOpenAddMemberDialog(true)}
+                >
+                  <FiUsers />
+                  <span>Add Member</span>
+                </button>
+              )}
+            </div>
+          </nav>
+        </aside>
 
-        <main className="room-main">
-          {activeTab === 'expense' && (
-            <Expense
-              socket={socket}
-              members={members}
-              userName={userName}
-              host={host}
-              id={id}
-            />
-          )}
-          {activeTab === 'chat' && (
-            <Chat
-              socket={socket}
-              userName={userName}
-              id={id}
-            />
-          )}
-          {activeTab === 'info' && (
-            <RoomInfo
-              roomName={roomName}
-              id={id}
-              host={host}
-              members={members}
-            />
-          )}
+        <main className="room-content">
+          <div className="content-container">
+            {activeTab === 'expense' && (
+              <Expense
+                socket={socket}
+                members={members}
+                userName={userName}
+                host={host}
+                id={id}
+              />
+            )}
+            {activeTab === 'settlements' && (
+              <Settlements
+                members={members}
+                host={host}
+                userName={userName}
+              />
+            )}
+            {activeTab === 'chat' && (
+              <Chat
+                socket={socket}
+                userName={userName}
+                id={id}
+              />
+            )}
+            {activeTab === 'info' && (
+              <RoomInfo
+                roomName={roomName}
+                id={id}
+                host={host}
+                members={members}
+              />
+            )}
+          </div>
         </main>
       </div>
 
@@ -235,20 +314,56 @@ const Room = ({ socket }) => {
               onChange={(e) => setMemberName(e.target.value)}
               placeholder="Enter member name"
               className="member-input"
+              autoFocus
             />
             <div className="modal-actions">
               <button
                 className="btn secondary"
                 onClick={() => setOpenAddMemberDialog(false)}
               >
-                Cancel
+                <FiX /> Cancel
               </button>
               <button
                 className="btn primary"
                 onClick={addMemberHandler}
                 disabled={!memberName.trim()}
               >
-                Add Member
+                <FiCheck /> Add Member
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showShareDialog && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>Share Room</h2>
+            <p>Share this link with others to invite them to the room:</p>
+            <div className="share-link-container">
+              <input
+                type="text"
+                value={shareLink}
+                readOnly
+                className="share-link-input"
+                onClick={(e) => e.target.select()}
+              />
+              <button
+                className="btn primary copy-link-btn"
+                onClick={copyShareLink}
+              >
+                {sharedLinkCopied ? <FiCheck /> : <FiCopy />}
+              </button>
+            </div>
+            <p className="share-note">
+              Note: The person joining will need to enter their name when they open the link.
+            </p>
+            <div className="modal-actions">
+              <button
+                className="btn primary"
+                onClick={() => setShowShareDialog(false)}
+              >
+                Done
               </button>
             </div>
           </div>

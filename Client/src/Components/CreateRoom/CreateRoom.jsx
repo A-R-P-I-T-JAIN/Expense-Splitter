@@ -161,7 +161,7 @@ const CreateRoom = ({ socket }) => {
         onClick={() => navigate('/')}
         title="Go to Home"
       >
-        <FontAwesomeIcon icon={faHome} size="lg" color="var(--primary)" />
+        <FontAwesomeIcon icon={faHome} size="sm" color="var(--primary)" />
         <span>Expense Splitter</span>
       </div>
 
@@ -169,7 +169,7 @@ const CreateRoom = ({ socket }) => {
         className="history-button"
         onClick={() => setShowPreviousRoom(true)}
       >
-        <FontAwesomeIcon icon={faHistory} /> Recent Rooms
+        <FontAwesomeIcon icon={faHistory} size="sm" /> Recent Rooms
       </button>
 
       {showPreviousRoom && (
@@ -179,7 +179,16 @@ const CreateRoom = ({ socket }) => {
               icon={faCircleXmark} 
               onClick={() => setShowPreviousRoom(false)}
               className="close-icon"
+              title="Close"
             />
+            
+            <div className="modal-header">
+              <h2>
+                <FontAwesomeIcon icon={faHistory} /> 
+                Recent Rooms
+              </h2>
+            </div>
+            
             <div className="your_rooms">
               <h1>Created Rooms</h1>
               <div className="rtemp">
@@ -190,8 +199,15 @@ const CreateRoom = ({ socket }) => {
                       className="room-card"
                       onClick={() => handleJoinSavedRoom(room.roomId)}
                     >
-                      <p><strong>Room ID:</strong> {room.roomId}</p>
-                      <p><strong>Room Name:</strong> {room.roomName}</p>
+                      <div className="room-card-header">
+                        <p className="room-card-title">
+                          {room.roomName || `Room #${room.roomId}`}
+                        </p>
+                        <span className="room-type-badge created-badge">
+                          CREATED
+                        </span>
+                      </div>
+                      <p><strong>Room ID:</strong> <span style={{wordBreak: 'break-all'}}>{room.roomId}</span></p>
                       {room.createdAt && (
                         <p><strong>Created:</strong> {formatDate(room.createdAt)}</p>
                       )}
@@ -215,7 +231,18 @@ const CreateRoom = ({ socket }) => {
                       className="room-card"
                       onClick={() => handleJoinSavedRoom(room)}
                     >
-                      <p><strong>Room ID:</strong> {room}</p>
+                      <div className="room-card-header">
+                        <p className="room-card-title">
+                          {room.length > 6 
+                            ? `Room #${room.substring(0, 3)}...${room.substring(room.length - 3)}`
+                            : `Room #${room}`
+                          }
+                        </p>
+                        <span className="room-type-badge joined-badge">
+                          JOINED
+                        </span>
+                      </div>
+                      <p><strong>Room ID:</strong> <span style={{wordBreak: 'break-all'}}>{room}</span></p>
                       <button className="join-saved-room">
                         <FontAwesomeIcon icon={faArrowRight} /> Enter Room
                       </button>

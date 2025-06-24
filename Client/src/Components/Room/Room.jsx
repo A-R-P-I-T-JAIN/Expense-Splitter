@@ -152,6 +152,14 @@ const Room = ({ socket }) => {
     setSidebarOpen(!sidebarOpen);
   };
 
+  const handleTabClick = (tab) => {
+    setActiveTab(tab);
+    // Close sidebar automatically on mobile when tab is selected
+    if (window.innerWidth < 768) {
+      setSidebarOpen(false);
+    }
+  };
+
   if (isDataLoading || (isLoading && !initialLoadComplete)) {
     return (
       <div className="loading-container">
@@ -226,28 +234,28 @@ const Room = ({ socket }) => {
           <nav className="sidebar-nav">
             <button
               className={`nav-btn ${activeTab === 'expense' ? 'active' : ''}`}
-              onClick={() => setActiveTab('expense')}
+              onClick={() => handleTabClick('expense')}
             >
               <FiDollarSign />
               <span>Expenses</span>
             </button>
             <button
               className={`nav-btn ${activeTab === 'settlements' ? 'active' : ''}`}
-              onClick={() => setActiveTab('settlements')}
+              onClick={() => handleTabClick('settlements')}
             >
               <FiFileText />
               <span>Settlements</span>
             </button>
             <button
               className={`nav-btn ${activeTab === 'chat' ? 'active' : ''}`}
-              onClick={() => setActiveTab('chat')}
+              onClick={() => handleTabClick('chat')}
             >
               <FiMessageSquare />
               <span>Chat</span>
             </button>
             <button
               className={`nav-btn ${activeTab === 'info' ? 'active' : ''}`}
-              onClick={() => setActiveTab('info')}
+              onClick={() => handleTabClick('info')}
             >
               <FiInfo />
               <span>Room Info</span>
